@@ -43,12 +43,12 @@ public interface MouseListener
     /**
      * user clicked on specific node
      */
-    void nodeClicked(String nodeId, GraphicElement element, Button button);
+    void nodeClicked(String nodeId, GraphicElement element, Button button, double x, double y);
 
     /**
      * user requested popup context menu
      */
-    void nodePopup();
+    void nodePopup(String nodeId, GraphicElement element, double x, double y);
 
     /**
      * user selected node

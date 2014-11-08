@@ -31,13 +31,6 @@
  */
 package org.graphstream.ui.graphicGraph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Element;
 import org.graphstream.graph.Graph;
@@ -47,6 +40,14 @@ import org.graphstream.ui.graphicGraph.stylesheet.Selector;
 import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants.ShadowMode;
 import org.graphstream.ui.graphicGraph.stylesheet.StyleSheet;
 import org.graphstream.ui.graphicGraph.stylesheet.StyleSheetListener;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * A set of style groups.
@@ -70,27 +71,27 @@ public class StyleGroupSet implements StyleSheetListener {
 	/**
 	 * All the groups indexed by their unique identifier.
 	 */
-	protected final Map<String, StyleGroup> groups = new TreeMap<String, StyleGroup>();
+	protected final Map<String, StyleGroup> groups = new TreeMap<>();
 
 	/**
 	 * Allows to retrieve the group containing a node knowing the node id.
 	 */
-	protected final Map<String, String> byNodeIdGroups = new TreeMap<String, String>();
+	protected final Map<String, String> byNodeIdGroups = new TreeMap<>();
 
 	/**
 	 * Allows to retrieve the group containing an edge knowing the node id.
 	 */
-	protected final Map<String, String> byEdgeIdGroups = new TreeMap<String, String>();
+	protected final Map<String, String> byEdgeIdGroups = new TreeMap<>();
 
 	/**
 	 * Allows to retrieve the group containing a sprite knowing the node id.
 	 */
-	protected final Map<String, String> bySpriteIdGroups = new TreeMap<String, String>();
+	protected final Map<String, String> bySpriteIdGroups = new TreeMap<>();
 
 	/**
 	 * Allows to retrieve the group containing a graph knowing the node id.
 	 */
-	protected final Map<String, String> byGraphIdGroups = new TreeMap<String, String>();
+	protected final Map<String, String> byGraphIdGroups = new TreeMap<>();
 
 	/**
 	 * Virtual set of nodes. This set provides fake methods to make it appear as
@@ -139,7 +140,7 @@ public class StyleGroupSet implements StyleSheetListener {
 	/**
 	 * Set of listeners.
 	 */
-	protected ArrayList<StyleGroupListener> listeners = new ArrayList<StyleGroupListener>();
+	protected ArrayList<StyleGroupListener> listeners = new ArrayList<>();
 
 	// Construction
 
@@ -204,7 +205,7 @@ public class StyleGroupSet implements StyleSheetListener {
 	 * 
 	 * @return The z index iterator.
 	 */
-	public Iterator<HashSet<StyleGroup>> getZIterator() {
+	public Iterator<Set<StyleGroup>> getZIterator() {
 		return zIndex.getIterator();
 	}
 
@@ -214,7 +215,7 @@ public class StyleGroupSet implements StyleSheetListener {
 	 * 
 	 * @return The z levels.
 	 */
-	public Iterable<HashSet<StyleGroup>> zIndex() {
+	public Iterable<Set<StyleGroup>> zIndex() {
 		return zIndex;
 	}
 
@@ -377,7 +378,7 @@ public class StyleGroupSet implements StyleSheetListener {
 	 * @return An iterator on all node elements contained in style groups.
 	 */
 	public Iterator<? extends Node> getNodeIterator() {
-		return new ElementIterator<Node>(byNodeIdGroups);
+		return new ElementIterator<>(byNodeIdGroups);
 	}
 
 	/**
@@ -386,7 +387,7 @@ public class StyleGroupSet implements StyleSheetListener {
 	 * @return An iterator on all graph elements contained in style groups.
 	 */
 	public Iterator<? extends Graph> getGraphIterator() {
-		return new ElementIterator<Graph>(byGraphIdGroups);
+		return new ElementIterator<>(byGraphIdGroups);
 	}
 
 	/**
@@ -413,7 +414,7 @@ public class StyleGroupSet implements StyleSheetListener {
 	 * @return An iterator on all edge elements contained in style groups.
 	 */
 	public Iterator<? extends Edge> getEdgeIterator() {
-		return new ElementIterator<Edge>(byEdgeIdGroups);
+		return new ElementIterator<>(byEdgeIdGroups);
 	}
 
 	/**
@@ -431,7 +432,7 @@ public class StyleGroupSet implements StyleSheetListener {
 	 * @return An iterator on all sprite elements contained in style groups.
 	 */
 	public Iterator<? extends GraphicSprite> getSpriteIterator() {
-		return new ElementIterator<GraphicSprite>(bySpriteIdGroups);
+		return new ElementIterator<>(bySpriteIdGroups);
 	}
 
 	/**
@@ -1060,7 +1061,7 @@ public class StyleGroupSet implements StyleSheetListener {
 	 */
 	protected void checkForNewStyle(Rule newRule,
 			Map<String, String> elt2grp) {
-		Collection<Element> elementsToCheck = new ArrayList<Element>();
+		Collection<Element> elementsToCheck = new ArrayList<>();
 
 		for (String eltId : elt2grp.keySet())
 			elementsToCheck.add(getElement(eltId, elt2grp));
@@ -1102,7 +1103,7 @@ public class StyleGroupSet implements StyleSheetListener {
 	 * @author Antoine Dutot
 	 */
 	public class EventSet {
-		public ArrayList<String> eventSet = new ArrayList<String>();
+		public ArrayList<String> eventSet = new ArrayList<>();
 
 		public String events[] = new String[0];
 
@@ -1152,16 +1153,16 @@ public class StyleGroupSet implements StyleSheetListener {
 	 * 
 	 * @author Antoine Dutot
 	 */
-	public class ZIndex implements Iterable<HashSet<StyleGroup>> {
+	public class ZIndex implements Iterable<Set<StyleGroup>> {
 		/**
 		 * Ordered set of groups.
 		 */
-		public ArrayList<HashSet<StyleGroup>> zIndex = new ArrayList<HashSet<StyleGroup>>();
+		public final ArrayList<HashSet<StyleGroup>> zIndex = new ArrayList<>();
 
 		/**
 		 * Knowing a group, tell if its Z index.
 		 */
-		public HashMap<String, Integer> reverseZIndex = new HashMap<String, Integer>();
+		public final Map<String, Integer> reverseZIndex = new TreeMap<>();
 
 		/**
 		 * New empty Z index.
@@ -1183,11 +1184,11 @@ public class StyleGroupSet implements StyleSheetListener {
 		 * 
 		 * @return Iterator on the Z index.
 		 */
-		protected Iterator<HashSet<StyleGroup>> getIterator() {
+		protected Iterator<Set<StyleGroup>> getIterator() {
 			return new ZIndexIterator();
 		}
 
-		public Iterator<HashSet<StyleGroup>> iterator() {
+		public Iterator<Set<StyleGroup>> iterator() {
 			return getIterator();
 		}
 
@@ -1300,7 +1301,7 @@ public class StyleGroupSet implements StyleSheetListener {
 			return sb.toString();
 		}
 
-		public class ZIndexIterator implements Iterator<HashSet<StyleGroup>> {
+		public class ZIndexIterator implements Iterator<Set<StyleGroup>> {
 			public int index = 0;
 
 			public ZIndexIterator() {
@@ -1312,11 +1313,13 @@ public class StyleGroupSet implements StyleSheetListener {
 					index++;
 			}
 
+            @Override
 			public boolean hasNext() {
 				return (index < 256);
 			}
 
-			public HashSet<StyleGroup> next() {
+            @Override
+			public Set<StyleGroup> next() {
 				if (hasNext()) {
 					HashSet<StyleGroup> cell = zIndex.get(index);
 					index++;
@@ -1327,6 +1330,7 @@ public class StyleGroupSet implements StyleSheetListener {
 				return null;
 			}
 
+            @Override
 			public void remove() {
 				throw new RuntimeException(
 						"This iterator does not support removal.");
@@ -1343,7 +1347,7 @@ public class StyleGroupSet implements StyleSheetListener {
 		/**
 		 * The set of groups casting shadow.
 		 */
-		protected HashSet<StyleGroup> shadowSet = new HashSet<StyleGroup>();
+		protected final Set<StyleGroup> shadowSet = new HashSet<>();
 
 		/**
 		 * Iterator on the set of groups that cast a shadow.

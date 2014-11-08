@@ -144,12 +144,12 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 	/**
 	 * Set of styles.
 	 */
-	protected StyleSheet styleSheet;
+	protected final StyleSheet styleSheet;
 
 	/**
 	 * Associate graphic elements with styles.
 	 */
-	protected StyleGroupSet styleGroups;
+	protected final StyleGroupSet styleGroups;
 
 	/**
 	 * Connectivity. The way nodes are connected one with another via edges. The
@@ -196,11 +196,6 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 	 * Set of listeners of this graph.
 	 */
 	protected GraphListeners listeners;
-
-	/**
-	 * Time of other known sources.
-	 */
-	// protected SinkTime sinkTime = new SinkTime();
 
 	/**
 	 * Are null attributes access an error ?

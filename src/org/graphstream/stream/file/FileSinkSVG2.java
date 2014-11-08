@@ -56,10 +56,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Set;
 
 public class FileSinkSVG2 implements FileSink {
 
@@ -304,14 +305,13 @@ public class FileSinkSVG2 implements FileSink {
 			writeElement(out, g);
 			out.close();
 
-			Iterator<HashSet<StyleGroup>> it = groups.getZIterator();
+			Iterator<Set<StyleGroup>> it = groups.getZIterator();
 
 			out.open("g");
 			out.attribute("id", "elements");
 
 			while (it.hasNext()) {
-				HashSet<StyleGroup> set = it.next();
-
+				Collection<StyleGroup> set = it.next();
 				for (StyleGroup sg : set)
 					for (Element e : sg.elements())
 						writeElement(out, e);

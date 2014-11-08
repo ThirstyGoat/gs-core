@@ -61,7 +61,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -297,7 +296,7 @@ public class SwingBasicGraphRenderer extends GraphRendererBase {
 			StyleGroupSet sgs = graph.getStyleGroups();
 
 			if (sgs != null) {
-				for (HashSet<StyleGroup> groups : sgs.zIndex()) {
+				for (Collection<StyleGroup> groups : sgs.zIndex()) {
 					for (StyleGroup group : groups) {
 						renderGroup(g, group);
 					}

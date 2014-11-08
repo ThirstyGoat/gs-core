@@ -49,8 +49,8 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
 
@@ -528,8 +528,8 @@ public class FileSinkTikZ extends FileSinkBase {
 
 		StyleGroupSet sgs = buffer.getStyleGroups();
 
-		for (HashSet<StyleGroup> groups : sgs.zIndex()) {
-			for (StyleGroup group : groups) {
+		for (final Collection<StyleGroup> groups : sgs.zIndex()) {
+			for (final StyleGroup group : groups) {
 				switch (group.getType()) {
 				case NODE:
 					for (Element e : group.elements())

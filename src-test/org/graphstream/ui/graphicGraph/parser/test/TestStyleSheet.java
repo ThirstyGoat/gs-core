@@ -31,24 +31,30 @@
  */
 package org.graphstream.ui.graphicGraph.parser.test;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Element;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.DefaultGraph;
 import org.graphstream.ui.graphicGraph.StyleGroup;
-import org.graphstream.ui.graphicGraph.StyleGroupSet;
 import org.graphstream.ui.graphicGraph.StyleGroup.ElementEvents;
+import org.graphstream.ui.graphicGraph.StyleGroupSet;
 import org.graphstream.ui.graphicGraph.stylesheet.Rule;
 import org.graphstream.ui.graphicGraph.stylesheet.Style;
 import org.graphstream.ui.graphicGraph.stylesheet.StyleSheet;
-import org.junit.*;
-import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Run several tests on the style sheet package.
@@ -570,7 +576,7 @@ public class TestStyleSheet {
 
 		// Now test the default Z index
 
-		Iterator<HashSet<StyleGroup>> zIndex = sgs.getZIterator();
+		Iterator<Set<StyleGroup>> zIndex = sgs.getZIterator();
 
 		// The groups we expect in order.
 		HashSet<String> groups1 = new HashSet<String>();
@@ -588,7 +594,7 @@ public class TestStyleSheet {
 		System.err.printf("---- zIndex ----%n");
 
 		assertTrue(zIndex.hasNext());
-		HashSet<StyleGroup> cell = zIndex.next();
+        Collection<StyleGroup> cell = zIndex.next();
 		for (StyleGroup g : cell) {
 			assertTrue(groups1.contains(g.getId()));
 			assertTrue(g.getZIndex() == 0);

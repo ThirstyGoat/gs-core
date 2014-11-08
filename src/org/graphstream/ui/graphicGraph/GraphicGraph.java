@@ -221,7 +221,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 		listeners = new GraphListeners(this);
 		styleSheet = new StyleSheet();
 		styleGroups = new StyleGroupSet(styleSheet);
-		connectivity = new HashMap<GraphicNode, List<GraphicEdge>>();
+		connectivity = new HashMap<>();
 
 		styleGroups.addListener(this);
 		styleGroups.addElement(this); // Add style to this graph.
@@ -498,6 +498,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 
 	// Style group listener interface
 
+    @Override
 	public void elementStyleChanged(Element element, StyleGroup oldStyle,
 			StyleGroup style) {
 		if (element instanceof GraphicElement) {
@@ -627,7 +628,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 			if (n2 == null)
 				throw new ElementNotFoundException("node \"%s\"", to);
 
-			edge = new GraphicEdge(id, n1, n2, directed, null);//, attributes);
+			edge = new GraphicEdge(id, n1, n2, directed, null);
 
 			styleGroups.addElement(edge);
 
@@ -635,12 +636,12 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
             List<GraphicEdge> l2 = connectivity.get(n2);
 
 			if (l1 == null) {
-				l1 = new ArrayList<GraphicEdge>();
+				l1 = new ArrayList<>();
 				connectivity.put(n1, l1);
 			}
 
 			if (l2 == null) {
-				l2 = new ArrayList<GraphicEdge>();
+				l2 = new ArrayList<>();
 				connectivity.put(n2, l2);
 			}
 
@@ -1096,8 +1097,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 	}
 
 	protected GraphicSprite removeSprite_(String id) {
-		GraphicSprite sprite = (GraphicSprite) styleGroups.getSprite(id);
-
+		GraphicSprite sprite = styleGroups.getSprite(id);
 		if (sprite != null) {
 			sprite.detach();
 			styleGroups.removeElement(sprite);

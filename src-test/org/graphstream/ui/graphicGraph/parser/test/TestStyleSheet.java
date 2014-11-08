@@ -46,10 +46,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -151,22 +151,22 @@ public class TestStyleSheet {
 
 	@Test
 	public void testRuleQuery() {
-		ArrayList<Rule> rulesA = stylesheet.getRulesFor(A);
+		List<Rule> rulesA = stylesheet.getRulesFor(A);
 		String idA = stylesheet.getStyleGroupIdFor(A, rulesA);
-		ArrayList<Rule> rulesB = stylesheet.getRulesFor(B);
+        List<Rule> rulesB = stylesheet.getRulesFor(B);
 		String idB = stylesheet.getStyleGroupIdFor(B, rulesB);
-		ArrayList<Rule> rulesC = stylesheet.getRulesFor(C);
+        List<Rule> rulesC = stylesheet.getRulesFor(C);
 		String idC = stylesheet.getStyleGroupIdFor(C, rulesC);
-		ArrayList<Rule> rulesD = stylesheet.getRulesFor(D);
+        List<Rule> rulesD = stylesheet.getRulesFor(D);
 		String idD = stylesheet.getStyleGroupIdFor(D, rulesD);
 
-		ArrayList<Rule> rulesAB = stylesheet.getRulesFor(AB);
+        List<Rule> rulesAB = stylesheet.getRulesFor(AB);
 		String idAB = stylesheet.getStyleGroupIdFor(AB, rulesAB);
-		ArrayList<Rule> rulesBC = stylesheet.getRulesFor(BC);
+        List<Rule> rulesBC = stylesheet.getRulesFor(BC);
 		String idBC = stylesheet.getStyleGroupIdFor(BC, rulesBC);
-		ArrayList<Rule> rulesCD = stylesheet.getRulesFor(CD);
+        List<Rule> rulesCD = stylesheet.getRulesFor(CD);
 		String idCD = stylesheet.getStyleGroupIdFor(CD, rulesCD);
-		ArrayList<Rule> rulesDA = stylesheet.getRulesFor(DA);
+        List<Rule> rulesDA = stylesheet.getRulesFor(DA);
 		String idDA = stylesheet.getStyleGroupIdFor(DA, rulesDA);
 
 		assertTrue(idA.equals("n_A"));
@@ -274,7 +274,7 @@ public class TestStyleSheet {
 		sgs.release();
 	}
 
-	protected String displayGroup(String id, ArrayList<Rule> rules) {
+	protected String displayGroup(String id, List<Rule> rules) {
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("(");

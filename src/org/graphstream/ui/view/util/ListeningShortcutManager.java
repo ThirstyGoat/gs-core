@@ -1,14 +1,16 @@
 package org.graphstream.ui.view.util;
 
-import org.graphstream.graph.Node;
 import org.graphstream.ui.geom.Point3;
+import org.graphstream.ui.graphicGraph.EmptySelectionModel;
+import org.graphstream.ui.graphicGraph.GraphicElement;
 import org.graphstream.ui.graphicGraph.GraphicGraph;
+import org.graphstream.ui.graphicGraph.SelectionModel;
 import org.graphstream.ui.view.Camera;
 import org.graphstream.ui.view.View;
 
 import java.awt.event.KeyEvent;
+import java.util.Collection;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -30,6 +32,8 @@ public class ListeningShortcutManager implements ShortcutManager
     private double rotation = 0;
 
     private final Set<NodeListener> listeners = new CopyOnWriteArraySet<>();
+
+    private SelectionModel selectionModel = EmptySelectionModel.getInstance();
 
 
     @Override
@@ -53,6 +57,7 @@ public class ListeningShortcutManager implements ShortcutManager
         {
             this.graph = null;
         }
+        this.selectionModel.clear();
     }
 
 
@@ -76,12 +81,32 @@ public class ListeningShortcutManager implements ShortcutManager
     }
 
 
+    public SelectionModel getSelectionModel()
+    {
+        return selectionModel;
+    }
+
+
+    public void setSelectionModel(final SelectionModel model)
+    {
+        if (null == model)
+        {
+            throw new IllegalArgumentException("Model cannot be null.");
+        }
+        this.selectionModel = model;
+    }
+
+
     @Override
     public void keyPressed(final KeyEvent event)
     {
         final Camera camera = view.getCamera();
 
-        if (event.getKeyCode() == KeyEvent.VK_PAGE_UP)
+        if (event.getKeyCode() == KeyEvent.VK_ESCAPE)
+        {
+            this.clearSelected();
+        }
+        else if (event.getKeyCode() == KeyEvent.VK_PAGE_UP)
         {
             camera.setViewPercent(Math.max(0.0001f,
                 camera.getViewPercent() * 0.9f));
@@ -195,33 +220,33 @@ public class ListeningShortcutManager implements ShortcutManager
         {
             this.view.getCamera().resetView();
         }
-        if (event.getKeyChar() == 'G')
+    }
+
+
+    private void clearSelected()
+    {
+        final Collection<GraphicElement> selected = this.selectionModel.list();
+        if (selected.isEmpty())
         {
-            this.handleGroup(event);
+            return;
         }
-        if (event.getKeyChar() == 'G' && event.isControlDown())
+
+        this.selectionModel.clear();
+        for (final GraphicElement element : selected)
         {
-            this.handleGroup(event);
+            for (final NodeListener l : this.listeners)
+            {
+                l.nodeUnselected(element.getId(), element);
+            }
         }
     }
 
 
-    private void handleGroup(final KeyEvent event)
+    protected void fireRemoved(final String id, final GraphicElement element)
     {
-        final Set<String> selected = new TreeSet<>();
-        for (final Node node : this.graph.getEachNode())
+        for (final NodeListener l : this.listeners)
         {
-            if (node.hasAttribute("ui.selected"))
-            {
-                selected.add(node.getId());
-            }
-        }
-        if (!selected.isEmpty())
-        {
-            for (final NodeListener l : this.listeners)
-            {
-                l.nodeGrouped(selected);
-            }
+            l.nodeRemoved(element.getId(), element);
         }
     }
 }

@@ -4,7 +4,6 @@ import org.graphstream.ui.graphicGraph.GraphicElement;
 
 import javax.swing.SwingUtilities;
 import java.awt.event.MouseEvent;
-import java.util.Set;
 
 /**
  * a mouse event listener
@@ -62,7 +61,7 @@ public interface NodeListener
     void nodeUnselected(String nodeId, GraphicElement element);
 
     /**
-     * user attempted to group set of elements
+     * user removed a node
      */
-    void nodeGrouped(Set<String> nodeIds);
+    void nodeRemoved(String nodeId, GraphicElement element);
 }

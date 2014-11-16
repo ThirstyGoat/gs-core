@@ -1,17 +1,18 @@
 package org.graphstream.ui.view.util;
 
+import org.graphstream.ui.graphicGraph.AttributeSelectionModel;
 import org.graphstream.ui.graphicGraph.GraphicEdge;
 import org.graphstream.ui.graphicGraph.GraphicElement;
 import org.graphstream.ui.graphicGraph.GraphicGraph;
 import org.graphstream.ui.graphicGraph.GraphicNode;
 import org.graphstream.ui.graphicGraph.GraphicSprite;
+import org.graphstream.ui.graphicGraph.SelectionModel;
 import org.graphstream.ui.view.View;
 
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -37,11 +38,6 @@ public class ListeningMouseManager implements MouseManager
     private final Set<NodeListener> listeners = new CopyOnWriteArraySet<>();
 
     /**
-     * the set of selected elements
-     */
-    private final Map<String, GraphicElement> selectedElements = new TreeMap<>();
-
-    /**
      * the currently selected/active elements
      */
     private GraphicElement activeElement;
@@ -50,6 +46,11 @@ public class ListeningMouseManager implements MouseManager
      * the mouse [x,y] value used for selection start position
      */
     protected Point2D selectionStart = null;
+
+    /**
+     * the graphic element selection model
+     */
+    private SelectionModel selectionModel = new AttributeSelectionModel();
 
 
     public boolean addListener(final NodeListener l)
@@ -72,6 +73,22 @@ public class ListeningMouseManager implements MouseManager
     }
 
 
+    public SelectionModel getSelectionModel()
+    {
+        return selectionModel;
+    }
+
+
+    public void setSelectionModel(final SelectionModel model)
+    {
+        if (null == model)
+        {
+            throw new IllegalArgumentException("Model cannot be null.");
+        }
+        this.selectionModel = model;
+    }
+
+
     @Override
     public void init(final GraphicGraph graph, final View view)
     {
@@ -87,6 +104,7 @@ public class ListeningMouseManager implements MouseManager
     {
         this.view.removeMouseListener(this);
         this.view.removeMouseMotionListener(this);
+        this.selectionModel.clear();
     }
 
 
@@ -121,7 +139,6 @@ public class ListeningMouseManager implements MouseManager
     @Override
     public void mouseReleased(final MouseEvent event)
     {
-        final NodeListener.Button button = NodeListener.Button.fromSwing(event);
         this.handleMouseReleased(event.getX(), event.getY());
     }
 
@@ -157,13 +174,13 @@ public class ListeningMouseManager implements MouseManager
 
     private void handleMousePressed(final NodeListener.Button button, final boolean multiSelect, final boolean toggleSelect, final double x, final double y)
     {
-        this.clear();
+        this.clearSelectionArea();
         this.activeElement = this.view.findNodeOrSpriteAt(x, y);
 
         if (this.activeElement != null)
         {
             // user clicked on specific element - determine if this is part of extended selection or click event
-            view.freezeElement(this.activeElement, true);
+            this.view.freezeElement(this.activeElement, true);
             if (NodeListener.Button.LEFT.equals(button))
             {
                 if (multiSelect)
@@ -172,16 +189,12 @@ public class ListeningMouseManager implements MouseManager
                 }
                 else if (toggleSelect)
                 {
-                    final String id = this.findNode(this.activeElement);
-                    if (id != null)
-                    {
-                        final boolean selected = this.selectedElements.containsKey(id);
-                        this.selectElement(this.activeElement, !selected);
-                    }
+                    final boolean selected = this.selectionModel.contains(this.activeElement);
+                    this.selectElement(this.activeElement, !selected);
                 }
                 else
                 {
-                    this.unselectAll();
+                    this.clearSelectedItems();
                     this.selectElement(this.activeElement, true);
                     this.clickElement(this.activeElement, true);
                 }
@@ -196,7 +209,7 @@ public class ListeningMouseManager implements MouseManager
                 this.selectionStart = new Point2D.Double(x, y);
                 if (!multiSelect && !toggleSelect)
                 {
-                    this.unselectAll();
+                    this.clearSelectedItems();
                 }
                 this.view.beginSelectionAt(this.selectionStart.getX(), this.selectionStart.getY());
             }
@@ -244,7 +257,7 @@ public class ListeningMouseManager implements MouseManager
             this.view.endSelectionAt(x2, y2);
 
             // reset context
-            this.clear();
+            this.clearSelectionArea();
         }
     }
 
@@ -262,10 +275,29 @@ public class ListeningMouseManager implements MouseManager
     }
 
 
-    private void clear()
+    private void clearSelectionArea()
     {
         this.activeElement = null;
         this.selectionStart = null;
+    }
+
+
+    private void clearSelectedItems()
+    {
+        final Collection<GraphicElement> selected = this.selectionModel.list();
+        if (selected.isEmpty())
+        {
+            return;
+        }
+
+        this.selectionModel.clear();
+        for (final GraphicElement element : selected)
+        {
+            for (final NodeListener l : this.listeners)
+            {
+                l.nodeUnselected(element.getId(), element);
+            }
+        }
     }
 
 
@@ -300,31 +332,16 @@ public class ListeningMouseManager implements MouseManager
             return;
         }
 
-        if (selected && !element.hasAttribute("ui.selected"))
+        if (selected && !this.selectionModel.contains(element))
         {
-            element.addAttribute("ui.selected");
-            this.selectedElements.put(id, element);
+            this.selectionModel.add(element);
             this.fireSelected(id, element);
         }
-        else if (!selected && element.hasAttribute("ui.selected"))
+        else if (!selected && this.selectionModel.contains(element))
         {
-            element.removeAttribute("ui.selected");
-            this.selectedElements.remove(id);
+            this.selectionModel.remove(element);
             this.fireUnselected(id, element);
         }
-    }
-
-
-    private void unselectAll()
-    {
-        for (final Map.Entry<String, GraphicElement> entry : this.selectedElements.entrySet())
-        {
-            final String id = entry.getKey();
-            final GraphicElement element = entry.getValue();
-            element.removeAttribute("ui.selected");
-            this.fireUnselected(id, element);
-        }
-        this.selectedElements.clear();
     }
 
 

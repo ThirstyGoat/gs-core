@@ -4,14 +4,15 @@ import org.graphstream.ui.graphicGraph.GraphicElement;
 
 import javax.swing.SwingUtilities;
 import java.awt.event.MouseEvent;
+import java.util.Set;
 
 /**
  * a mouse event listener
- * <p/>
+ * <p>
  * User: bowen
  * Date: 8/14/14
  */
-public interface MouseListener
+public interface NodeListener
 {
     public enum Button
     {
@@ -59,4 +60,9 @@ public interface MouseListener
      * user unselected node
      */
     void nodeUnselected(String nodeId, GraphicElement element);
+
+    /**
+     * user attempted to group set of elements
+     */
+    void nodeGrouped(Set<String> nodeIds);
 }

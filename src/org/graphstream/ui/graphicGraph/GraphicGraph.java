@@ -34,6 +34,7 @@ package org.graphstream.ui.graphicGraph;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.EdgeFactory;
 import org.graphstream.graph.Element;
+import org.graphstream.graph.ElementComparator;
 import org.graphstream.graph.ElementNotFoundException;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.IdAlreadyInUseException;
@@ -61,16 +62,16 @@ import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Graph representation used in display classes.
- * 
+ *
  * <p>
  * Warning: This class is NOT a general graph class, and it should NOT be used
  * as it. This class is particularly dedicated to fast drawing of the graph and
@@ -80,7 +81,7 @@ import java.util.logging.Logger;
  * and will throw an exception if used (as documented in their respective
  * JavaDoc).
  * </p>
- * 
+ *
  * <p>
  * The purpose of the graphic graph is to represent a graph with some often used
  * graphic attributes (like position, label, etc.) stored as fields in the nodes
@@ -89,24 +90,24 @@ import java.util.logging.Logger;
  * defines a label, a position (x,y,z) and a style that is taken from the style
  * sheet.
  * </p>
- * 
+ *
  * <p>
  * The style sheet is uploaded on the graph using an attribute correspondingly
  * named "ui.stylesheet" or "ui.stylesheet" (the second one is better). It can
  * be a string that contains the whole style sheet, or an URL of the form :
  * </p>
- * 
+ *
  * <pre>
  * url(name)
  * </pre>
- * 
+ *
  * <p>
  * The graphic graph does not completely duplicate a graph, it only store things
  * that are useful for drawing it. Although it implements "Graph", some methods
  * are not implemented and will throw a runtime exception. These methods are
  * mostly utility methods like write(), read(), and naturally display().
  * </p>
- * 
+ *
  * <p>
  * The graphic graph has the ability to store attributes like any other graph
  * element, however the attributes stored by the graphic graph are restricted.
@@ -121,17 +122,17 @@ import java.util.logging.Logger;
  * graphic graph is used as an input (a source of graph events) some attributes
  * will not pass through the filter.
  * </p>
- * 
+ *
  * <p>
  * The implementation of this graph relies on the StyleGroupSet class and this
  * is indeed its way to store its elements (grouped by style and Z level).
  * </p>
- * 
+ *
  * <p>
  * In addition to this, it provides, as all graphs do, the relational
  * information for edges.
  * </p>
- * 
+ *
  * TODO : this graph cannot handle modification inside event listener methods !!
  */
 public class GraphicGraph extends AbstractElement implements Graph, StyleGroupListener {
@@ -211,7 +212,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 
 	/**
 	 * New empty graphic graph.
-	 * 
+	 *
 	 * A default style sheet is created, it then can be "cascaded" with other
 	 * style sheets.
 	 */
@@ -221,7 +222,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 		listeners = new GraphListeners(this);
 		styleSheet = new StyleSheet();
 		styleGroups = new StyleGroupSet(styleSheet);
-		connectivity = new HashMap<>();
+		connectivity = new TreeMap<>(ElementComparator.getInstance());
 
 		styleGroups.addListener(this);
 		styleGroups.addElement(this); // Add style to this graph.
@@ -234,7 +235,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 	/**
 	 * True if the graph was edited or changed in any way since the last reset
 	 * of the "changed" flag.
-	 * 
+	 *
 	 * @return true if the graph was changed.
 	 */
 	public boolean graphChangedFlag() {
@@ -243,7 +244,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 
 	/**
 	 * Reset the "changed" flag.
-	 * 
+	 *
 	 * @see #graphChangedFlag()
 	 */
 	public void resetGraphChangedFlag() {
@@ -253,7 +254,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 	/**
 	 * The style sheet. This style sheet is the result of the "cascade" or
 	 * accumulation of styles added via attributes of the graph.
-	 * 
+	 *
 	 * @return A style sheet.
 	 */
 	public StyleSheet getStyleSheet() {
@@ -262,7 +263,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 
 	/**
 	 * The graph style group.
-	 * 
+	 *
 	 * @return A style group.
 	 */
 	public StyleGroup getStyle() {
@@ -271,7 +272,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 
 	/**
 	 * The complete set of style groups.
-	 * 
+	 *
 	 * @return The style groups.
 	 */
 	public StyleGroupSet getStyleGroups() {
@@ -292,7 +293,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 	/**
 	 * The maximum position of a node or sprite. Notice that this is updated
 	 * only each time the {@link #computeBounds()} method is called.
-	 * 
+	 *
 	 * @return The maximum node or sprite position.
 	 */
 	public Point3 getMaxPos() {
@@ -302,7 +303,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 	/**
 	 * The minimum position of a node or sprite. Notice that this is updated
 	 * only each time the {@link #computeBounds()} method is called.
-	 * 
+	 *
 	 * @return The minimum node or sprite position.
 	 */
 	public Point3 getMinPos() {
@@ -334,12 +335,12 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 	 * nodes and sprites centres since the node and graph bounds may in certain
 	 * circumstances be computed according to the graph bounds. The bounds are
 	 * stored in the graph metrics.
-	 * 
+	 *
 	 * This operation will process each node and sprite and is therefore costly.
 	 * However it does this computation again only when a node or sprite moved.
 	 * Therefore it can be called several times, if nothing moved in the graph,
 	 * the computation will not be redone.
-	 * 
+	 *
 	 * @see #getMaxPos()
 	 * @see #getMinPos()
 	 */
@@ -752,7 +753,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 				// We must do a copy of the connectivity set for the node
 				// since we will be modifying the connectivity as we process
 				// edges.
-				List<GraphicEdge> l = new ArrayList<GraphicEdge>(
+				List<GraphicEdge> l = new ArrayList<>(
 						connectivity.get(node));
 
 				for (GraphicEdge edge : l)
@@ -1236,7 +1237,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 	/**
 	 * Replay all the elements of the graph and all attributes as new events to
 	 * all connected sinks.
-	 * 
+	 *
 	 * Be very careful with this method, it introduces new events in the event
 	 * stream and some sinks may therefore receive them twice !! Graph replay is
 	 * always dangerous !

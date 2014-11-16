@@ -16,7 +16,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * a mouse manager that notifies listeners mouse user-interface events
- * <p/>
+ * <p>
  * User: bowen Date: 8/14/14
  */
 public class ListeningMouseManager implements MouseManager
@@ -34,7 +34,7 @@ public class ListeningMouseManager implements MouseManager
     /**
      * mouse listener set
      */
-    private final Set<MouseListener> listeners = new CopyOnWriteArraySet<>();
+    private final Set<NodeListener> listeners = new CopyOnWriteArraySet<>();
 
     /**
      * the set of selected elements
@@ -51,7 +51,8 @@ public class ListeningMouseManager implements MouseManager
      */
     protected Point2D selectionStart = null;
 
-    public boolean addListener(final MouseListener l)
+
+    public boolean addListener(final NodeListener l)
     {
         if (null == l)
         {
@@ -60,7 +61,8 @@ public class ListeningMouseManager implements MouseManager
         return this.listeners.add(l);
     }
 
-    public boolean removeListener(final MouseListener l)
+
+    public boolean removeListener(final NodeListener l)
     {
         if (null == l)
         {
@@ -68,6 +70,7 @@ public class ListeningMouseManager implements MouseManager
         }
         return this.listeners.remove(l);
     }
+
 
     @Override
     public void init(final GraphicGraph graph, final View view)
@@ -78,12 +81,14 @@ public class ListeningMouseManager implements MouseManager
         view.addMouseMotionListener(this);
     }
 
+
     @Override
     public void release()
     {
-        view.removeMouseListener(this);
-        view.removeMouseMotionListener(this);
+        this.view.removeMouseListener(this);
+        this.view.removeMouseMotionListener(this);
     }
+
 
     @Override
     public void mouseClicked(final MouseEvent event)
@@ -94,13 +99,14 @@ public class ListeningMouseManager implements MouseManager
         }
     }
 
+
     @Override
     public void mousePressed(final MouseEvent event)
     {
-        final MouseListener.Button button = MouseListener.Button.fromSwing(event);
+        final NodeListener.Button button = NodeListener.Button.fromSwing(event);
         final boolean multiSelect = event.isShiftDown();
         final boolean toggleSelect;
-        if (MouseListener.Button.LEFT.equals(button))
+        if (NodeListener.Button.LEFT.equals(button))
         {
             toggleSelect = event.isControlDown() || event.isMetaDown();
         }
@@ -111,19 +117,22 @@ public class ListeningMouseManager implements MouseManager
         this.handleMousePressed(button, multiSelect, toggleSelect, event.getX(), event.getY());
     }
 
+
     @Override
     public void mouseReleased(final MouseEvent event)
     {
-        final MouseListener.Button button = MouseListener.Button.fromSwing(event);
+        final NodeListener.Button button = NodeListener.Button.fromSwing(event);
         this.handleMouseReleased(event.getX(), event.getY());
     }
+
 
     @Override
     public void mouseDragged(final MouseEvent event)
     {
-        final MouseListener.Button button = MouseListener.Button.fromSwing(event);
+        final NodeListener.Button button = NodeListener.Button.fromSwing(event);
         this.handleMouseDragged(button, event.getX(), event.getY());
     }
+
 
     @Override
     public void mouseEntered(final MouseEvent event)
@@ -131,11 +140,13 @@ public class ListeningMouseManager implements MouseManager
 
     }
 
+
     @Override
     public void mouseExited(final MouseEvent event)
     {
 
     }
+
 
     @Override
     public void mouseMoved(final MouseEvent e)
@@ -143,7 +154,8 @@ public class ListeningMouseManager implements MouseManager
 
     }
 
-    private void handleMousePressed(final MouseListener.Button button, final boolean multiSelect, final boolean toggleSelect, final double x, final double y)
+
+    private void handleMousePressed(final NodeListener.Button button, final boolean multiSelect, final boolean toggleSelect, final double x, final double y)
     {
         this.clear();
         this.activeElement = this.view.findNodeOrSpriteAt(x, y);
@@ -152,7 +164,7 @@ public class ListeningMouseManager implements MouseManager
         {
             // user clicked on specific element - determine if this is part of extended selection or click event
             view.freezeElement(this.activeElement, true);
-            if (MouseListener.Button.LEFT.equals(button))
+            if (NodeListener.Button.LEFT.equals(button))
             {
                 if (multiSelect)
                 {
@@ -179,7 +191,7 @@ public class ListeningMouseManager implements MouseManager
         {
             // user clicked on empty space - start selection
             this.view.requestFocus();
-            if (MouseListener.Button.LEFT.equals(button))
+            if (NodeListener.Button.LEFT.equals(button))
             {
                 this.selectionStart = new Point2D.Double(x, y);
                 if (!multiSelect && !toggleSelect)
@@ -190,6 +202,7 @@ public class ListeningMouseManager implements MouseManager
             }
         }
     }
+
 
     private void handleMouseReleased(final double x, final double y)
     {
@@ -235,9 +248,10 @@ public class ListeningMouseManager implements MouseManager
         }
     }
 
-    private void handleMouseDragged(final MouseListener.Button button, final double x, final double y)
+
+    private void handleMouseDragged(final NodeListener.Button button, final double x, final double y)
     {
-        if (MouseListener.Button.LEFT.equals(button) && this.activeElement != null)
+        if (NodeListener.Button.LEFT.equals(button) && this.activeElement != null)
         {
             this.view.moveElementAtPx(this.activeElement, x, y);
         }
@@ -247,11 +261,13 @@ public class ListeningMouseManager implements MouseManager
         }
     }
 
+
     private void clear()
     {
         this.activeElement = null;
         this.selectionStart = null;
     }
+
 
     private void clickElement(final GraphicElement element, final boolean clicked)
     {
@@ -269,6 +285,7 @@ public class ListeningMouseManager implements MouseManager
             element.removeAttribute("ui.clicked");
         }
     }
+
 
     private void selectElement(final GraphicElement element, final boolean selected)
     {
@@ -297,6 +314,7 @@ public class ListeningMouseManager implements MouseManager
         }
     }
 
+
     private void unselectAll()
     {
         for (final Map.Entry<String, GraphicElement> entry : this.selectedElements.entrySet())
@@ -308,6 +326,7 @@ public class ListeningMouseManager implements MouseManager
         }
         this.selectedElements.clear();
     }
+
 
     private String findNode(final GraphicElement element)
     {
@@ -336,15 +355,17 @@ public class ListeningMouseManager implements MouseManager
         return null;
     }
 
+
     private void firePopup(final MouseEvent event)
     {
         final GraphicElement element = this.view.findNodeOrSpriteAt(event.getX(), event.getY());
         final String node = this.findNode(element);
-        for (final MouseListener l : this.listeners)
+        for (final NodeListener l : this.listeners)
         {
             l.nodePopup(node, element, event.getX(), event.getY());
         }
     }
+
 
     private void fireSelected(final String id, final GraphicElement element)
     {
@@ -357,11 +378,12 @@ public class ListeningMouseManager implements MouseManager
             return;
         }
 
-        for (final MouseListener l : this.listeners)
+        for (final NodeListener l : this.listeners)
         {
             l.nodeSelected(id, element);
         }
     }
+
 
     private void fireUnselected(final String id, final GraphicElement element)
     {
@@ -374,7 +396,7 @@ public class ListeningMouseManager implements MouseManager
             return;
         }
 
-        for (final MouseListener l : this.listeners)
+        for (final NodeListener l : this.listeners)
         {
             l.nodeUnselected(id, element);
         }

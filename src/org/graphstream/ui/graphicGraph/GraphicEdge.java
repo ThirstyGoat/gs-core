@@ -37,7 +37,10 @@ import org.graphstream.stream.SourceBase.ElementType;
 import org.graphstream.ui.graphicGraph.stylesheet.Selector;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Graphical edge.
@@ -55,12 +58,12 @@ public class GraphicEdge extends GraphicElement implements Edge {
 	/**
 	 * The first node.
 	 */
-	public GraphicNode from;
+	public final GraphicNode from;
 
 	/**
 	 * The second node.
 	 */
-	public GraphicNode to;
+	public final GraphicNode to;
 
 	/**
 	 * Is the edge directed ?.
@@ -106,15 +109,12 @@ public class GraphicEdge extends GraphicElement implements Edge {
 	 *            A set of initial attributes.
 	 */
 	public GraphicEdge(String id, GraphicNode from, GraphicNode to,
-			boolean dir, HashMap<String, Object> attributes) {
+			boolean dir, Map<String, Object> attributes) {
 		super(id, from.mygraph);
 
 		this.from = from;
 		this.to = to;
 		this.directed = dir;
-
-		if (this.attributes == null)
-			this.attributes = new HashMap<String, Object>();
 
 		if (attributes != null)
 			addAttributes(attributes);
@@ -229,18 +229,18 @@ public class GraphicEdge extends GraphicElement implements Edge {
 	 *            The actual set of edges between two nodes (see the
 	 *            connectivity in the graphic graph).
 	 */
-	protected void countSameEdges(Iterable<GraphicEdge> edgeList) {
+	protected void countSameEdges(final Iterable<GraphicEdge> edgeList) {
 		for (GraphicEdge other : edgeList) {
 			if (other != this) {
-				if ((other.from == from && other.to == to)
-						|| (other.to == from && other.from == to)) {
+				if ((other.from == from && other.to == to) ||
+					(other.to == from && other.from == to)) {
 					group = other.group;
-
-					if (group == null)
+					if (group == null) {
 						group = new EdgeGroup(other, this);
-					else
+						other.group = group;
+					} else {
 						group.increment(this);
-
+					}
 					break;
 				}
 			}
@@ -251,9 +251,9 @@ public class GraphicEdge extends GraphicElement implements Edge {
 	public void removed() {
 		if (group != null) {
 			group.decrement(this);
-
-			if (group.getCount() == 1)
+			if (group.getCount() <= 1) {
 				group = null;
+			}
 		}
 	}
 
@@ -314,14 +314,7 @@ public class GraphicEdge extends GraphicElement implements Edge {
 	}
 
 	public void setDirected(boolean on) {
-		directed = on; // / XXX
-	}
-
-	public void switchDirection() {
-		GraphicNode tmp; // XXX
-		tmp = from;
-		from = to;
-		to = tmp;
+		directed = on;
 	}
 
 	// Nested classes
@@ -336,7 +329,7 @@ public class GraphicEdge extends GraphicElement implements Edge {
 		/**
 		 * The set of multiple edges.
 		 */
-		public ArrayList<GraphicEdge> edges;
+		private final List<GraphicEdge> edges;
 
 		/**
 		 * Create a new edge group, starting with two edges.
@@ -347,13 +340,17 @@ public class GraphicEdge extends GraphicElement implements Edge {
 		 *            The second edge.
 		 */
 		public EdgeGroup(GraphicEdge first, GraphicEdge second) {
-			edges = new ArrayList<GraphicEdge>();
+			edges = new ArrayList<>();
 			first.group = this;
 			second.group = this;
 			edges.add(first);
 			edges.add(second);
 			first.multi = 0;
 			second.multi = 1;
+		}
+
+		public Collection<GraphicEdge> getEdges()  {
+			return Collections.unmodifiableCollection(this.edges);
 		}
 
 		/**
@@ -382,9 +379,16 @@ public class GraphicEdge extends GraphicElement implements Edge {
 		 * @param edge
 		 *            The edge to add.
 		 */
-		public void increment(GraphicEdge edge) {
-			edge.multi = getCount();
-			edges.add(edge);
+		public boolean increment(final GraphicEdge edge) {
+			if (null == edge)  {
+				return false;
+			}
+			if (this.edges.add(edge))  {
+				edge.multi = getCount() - 1;
+				return true;
+			} else {
+				return false;
+			}
 		}
 
 		/**
@@ -393,12 +397,18 @@ public class GraphicEdge extends GraphicElement implements Edge {
 		 * @param edge
 		 *            The edge to remove.
 		 */
-		public void decrement(GraphicEdge edge) {
-			edges.remove(edges.indexOf(edge));
-
-			for (int i = 0; i < edges.size(); i++)
-				edges.get(i).multi = i;
+		public boolean decrement(final GraphicEdge edge) {
+			if (null == edge)  {
+				return false;
+			}
+			if (!this.edges.remove(edge)) {
+				edge.multi = 0;
+				return false;
+			}
+			for (int i = 0; i < this.edges.size(); i++) {
+				this.edges.get(i).multi = i;
+			}
+			return true;
 		}
 	}
-
 }

@@ -32,6 +32,7 @@
 package org.graphstream.ui.graphicGraph;
 
 import org.graphstream.graph.Element;
+import org.graphstream.graph.ElementComparator;
 import org.graphstream.ui.graphicGraph.GraphicElement.SwingElementRenderer;
 import org.graphstream.ui.graphicGraph.stylesheet.Rule;
 import org.graphstream.ui.graphicGraph.stylesheet.Selector;
@@ -39,13 +40,12 @@ import org.graphstream.ui.graphicGraph.stylesheet.Style;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * A group of graph elements that share the same style.
@@ -120,13 +120,13 @@ public class StyleGroup extends Style implements Iterable<Element>
      * event. Such elements must be rendered one by one, not in groups like
      * others.
      */
-    protected final Map<Element, ElementEvents> eventsFor = new TreeMap<>();
+    protected final Map<Element, ElementEvents> eventsFor = new TreeMap<>(ElementComparator.getInstance());
 
     /**
      * Set of elements that have some dynamic style values. Such elements must
      * be rendered one by one, not in groups, like others.
      */
-    protected final Set<Element> dynamicOnes = new HashSet<>();
+    protected final Set<Element> dynamicOnes = new TreeSet<>(ElementComparator.getInstance());
 
     /**
      * A set of events actually pushed only for this group.

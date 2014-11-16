@@ -218,7 +218,7 @@ public class GraphicNode extends GraphicElement implements Node {
 
     @Override
 	public int getDegree() {
-        List<GraphicEdge> edges = mygraph.connectivity.get(this);
+        Collection<GraphicEdge> edges = mygraph.connectivity.get(this);
 
 		if (edges != null)
 			return edges.size();

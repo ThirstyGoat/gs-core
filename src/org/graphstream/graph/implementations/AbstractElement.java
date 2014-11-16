@@ -71,7 +71,7 @@ public abstract class AbstractElement implements Element {
 	 * Attributes map. This map is created only when needed. It contains pairs
 	 * (key,value) where the key is the attribute name and the value an Object.
 	 */
-	protected Map<String, Object> attributes = null;
+	protected final Map<String, Object> attributes = new TreeMap<>();
 
 	// Construction
 
@@ -608,8 +608,6 @@ public abstract class AbstractElement implements Element {
         if (null == attribute) {
             return false;
         }
-		if (attributes == null)
-			attributes = new TreeMap<>();
 
 		final Object value;
         if (null == values || values.length == 0)
@@ -658,8 +656,7 @@ public abstract class AbstractElement implements Element {
         if (null == attributes || attributes.isEmpty()) {
             return false;
         }
-		if (this.attributes == null)
-			this.attributes = new TreeMap<>();
+
         boolean modified = false;
         for(final Map.Entry<String, Object> entry : attributes.entrySet()) {
             modified |= this.addAttribute(entry.getKey(), entry.getValue());

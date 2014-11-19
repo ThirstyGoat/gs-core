@@ -38,10 +38,10 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.NodeFactory;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.TreeMap;
 
 /**
  * <p>
@@ -62,8 +62,8 @@ public class AdjacencyListGraph extends AbstractGraph {
 	public static final int DEFAULT_NODE_CAPACITY = 128;
 	public static final int DEFAULT_EDGE_CAPACITY = 1024;
 
-	protected Map<String, AbstractNode> nodeMap;
-	protected Map<String, AbstractEdge> edgeMap;
+	protected final Map<String, AbstractNode> nodeMap;
+	protected final Map<String, AbstractEdge> edgeMap;
 
 	protected AbstractNode[] nodeArray;
 	protected AbstractEdge[] edgeArray;
@@ -118,10 +118,8 @@ public class AdjacencyListGraph extends AbstractGraph {
 		if (initialEdgeCapacity < DEFAULT_EDGE_CAPACITY)
 			initialEdgeCapacity = DEFAULT_EDGE_CAPACITY;
 
-		nodeMap = new HashMap<String, AbstractNode>(
-				4 * initialNodeCapacity / 3 + 1);
-		edgeMap = new HashMap<String, AbstractEdge>(
-				4 * initialEdgeCapacity / 3 + 1);
+		nodeMap = new TreeMap<>();
+		edgeMap = new TreeMap<>();
 		nodeArray = new AbstractNode[initialNodeCapacity];
 		edgeArray = new AbstractEdge[initialEdgeCapacity];
 		nodeCount = edgeCount = 0;

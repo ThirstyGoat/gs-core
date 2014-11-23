@@ -35,7 +35,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Path description.
@@ -70,7 +71,7 @@ public class Path implements Structure {
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(Path.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(Path.class);
 
 	// ------------- ATTRIBUTES ------------
 
@@ -121,7 +122,7 @@ public class Path implements Structure {
 			this.root = root;
 			nodePath.push(root);
 		} else {
-            logger.warning("Root node is not null - first use the clear method.");
+            logger.warn("Root node is not null - first use the clear method.");
 		}
 	}
 
@@ -230,7 +231,7 @@ public class Path implements Structure {
 			nodePath.push(edge.getOpposite(from));
 			edgePath.push(edge);
 		} else {
-			logger.warning("Cannot add the specified edge, it cannot be part of the path! %n");
+			logger.warn("Cannot add the specified edge, it cannot be part of the path! %n");
 		}
 	}
 

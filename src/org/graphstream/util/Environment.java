@@ -38,15 +38,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Representation of a set of parameters.
@@ -114,7 +114,7 @@ import java.util.logging.Logger;
  */
 public class Environment implements Cloneable
 {
-    private static final Logger logger = Logger.getLogger(Environment.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(Environment.class);
 
     // ---------- Attributes -----------
 
@@ -132,7 +132,7 @@ public class Environment implements Cloneable
 	 * Set of parameters. This is a hash table and not a hashmap since several
 	 * thread may access this class at once.
 	 */
-	protected Hashtable<String, String> parameters = new Hashtable<String, String>();
+	protected Map<String, String> parameters = new ConcurrentHashMap<>();
 
 	/**
 	 * When locked the environment parameters value still can be changed but it
@@ -482,7 +482,7 @@ public class Environment implements Cloneable
 				}
 				catch( NumberFormatException e )
 				{
-                    logger.warning(String.format("cannot set '%s' to the value '%s', values is not a long%n", method.toString(), value));
+                    logger.warn(String.format("cannot set '%s' to the value '%s', values is not a long%n", method.toString(), value), e);
 				}
 			}
 			else if( types[0] == Integer.TYPE )
@@ -494,7 +494,7 @@ public class Environment implements Cloneable
 				}
 				catch( NumberFormatException e )
 				{
-					logger.warning(String.format("cannot set '%s' to the value '%s', values is not a int%n", method.toString(), value));
+					logger.warn(String.format("cannot set '%s' to the value '%s', values is not a int%n", method.toString(), value), e);
 				}
 			}
 			else if( types[0] == Double.TYPE )
@@ -506,7 +506,7 @@ public class Environment implements Cloneable
 				}
 				catch( NumberFormatException e )
 				{
-					logger.warning(String.format("cannot set '%s' to the value '%s', values is not a double%n", method.toString(), value));
+					logger.warn(String.format("cannot set '%s' to the value '%s', values is not a double%n", method.toString(), value), e);
 				}
 			}
 			else if( types[0] == Float.TYPE )
@@ -518,7 +518,7 @@ public class Environment implements Cloneable
 				}
 				catch( NumberFormatException e )
 				{
-					logger.warning(String.format("cannot set '%s' to the value '%s', values is not a float%n", method.toString(), value));
+					logger.warn(String.format("cannot set '%s' to the value '%s', values is not a float%n", method.toString(), value), e);
 				}
 			}
 			else if( types[0] == Boolean.TYPE )
@@ -536,7 +536,7 @@ public class Environment implements Cloneable
 				}
 				catch( NumberFormatException e )
 				{
-					logger.warning(String.format("cannot set '%s' to the value '%s', values is not a boolean%n", method.toString(), value));
+					logger.warn(String.format("cannot set '%s' to the value '%s', values is not a boolean%n", method.toString(), value), e);
 				}
 			}
 			else if( types[0] == String.class )
@@ -545,16 +545,12 @@ public class Environment implements Cloneable
 			}
 			else
 			{
-				logger.warning(String.format("cannot match parameter '%s' and the method '%s'%n", value, method.toString()));
+				logger.warn(String.format("cannot match parameter '%s' and the method '%s'%n", value, method.toString()));
 			}
 		}
-		catch( InvocationTargetException ite )
+		catch( Exception e )
 		{
-			logger.warning(String.format("cannot invoke method '%s' : invocation targer error : %s%n", method.toString(), ite.getMessage()));
-		}
-		catch( IllegalAccessException iae )
-		{
-			logger.warning(String.format("cannot invoke method '%s' : illegal access error : %s%n", method.toString(), iae.getMessage()));
+			logger.warn(String.format("cannot invoke method '%s'", method.toString()), e);
 		}
 	}
 
@@ -677,7 +673,7 @@ public class Environment implements Cloneable
 						}
 						else
 						{
-                            logger.warning(String.format("Something is wrong with the configuration file \"%s\"near line %d :\n %s", filename, count, str));
+                            logger.warn(String.format("Something is wrong with the configuration file \"%s\"near line %d :\n %s", filename, count, str));
 							if( trashcan != null )
 							{
 								trashcan.add( str );
@@ -696,9 +692,7 @@ public class Environment implements Cloneable
 		}
 		catch( FileNotFoundException fnfe )
 		{
-			System.err.printf(
-					"Tried to open \"%s\" as a config file: file not found.%n",
-					filename );
+			logger.warn(String.format("Tried to open \"%s\" as a config file: file not found.%n", filename), fnfe);
 			if( trashcan != null )
 			{
 				trashcan.add( filename );
@@ -706,13 +700,13 @@ public class Environment implements Cloneable
 		}
 		catch( IOException ioe )
 		{
-			ioe.printStackTrace();
+			logger.warn("Unable to open/read config file.", ioe);
 			System.exit( 0 );
 		}
 	}
 
 	/**
-	 * Save the curent parameters to a file.
+	 * Save the current parameters to a file.
 	 * @param fileName Name of the file to save the config in.
 	 * @throws IOException For any output error on the given file name.
 	 */
@@ -744,7 +738,7 @@ public class Environment implements Cloneable
 		}
 		catch( IOException ioe )
 		{
-			logger.log(Level.WARNING, String.format("%-5s : %s : %s\n", "Warning", "Environment", "Something wrong while reading the configuration file."), ioe);
+			logger.warn(String.format("%-5s : %s : %s\n", "Warning", "Environment", "Something wrong while reading the configuration file."), ioe);
 		}
 	}
 
@@ -780,7 +774,7 @@ public class Environment implements Cloneable
 
 				if( val.length != 2 )
 				{
-                    logger.warning(String.format("%-5s : %s : %s\n", "Warn",
+                    logger.warn(String.format("%-5s : %s : %s\n", "Warn",
 							"Environment",
 							"Something is wrong in your configuration file near line "
 									+ count + " : \n" + Arrays.toString( val ) ));

@@ -32,8 +32,8 @@
 package org.graphstream.ui.layout;
 
 import java.security.AccessControlException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A factory in charge or creating various layout implementations.
@@ -51,7 +51,7 @@ public class Layouts {
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(Layouts.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(Layouts.class);
 
 	/**
 	 * Creates a layout according to the "org.graphstream.ui.layout" system property.
@@ -66,7 +66,7 @@ public class Layouts {
 		try {
 			layoutClassName = System.getProperty("gs.ui.layout");
 			if (layoutClassName != null) {
-                logger.log(Level.WARNING, "\"gs.ui.layout\" is deprecated, use \"org.graphstream.ui.layout\" instead.");
+                logger.warn("\"gs.ui.layout\" is deprecated, use \"org.graphstream.ui.layout\" instead.");
 			} else {
 				layoutClassName = System.getProperty("org.graphstream.ui.layout");
 			}
@@ -82,10 +82,10 @@ public class Layouts {
 				if (object instanceof Layout) {
 					return (Layout) object;
 				} else {
-                    logger.warning(String.format("class '%s' is not a 'GraphRenderer'%n", object));
+                    logger.warn(String.format("class '%s' is not a 'GraphRenderer'%n", object));
 				}
 			} catch (Exception e) {
-                logger.log(Level.WARNING, "Cannot create layout.", e);
+                logger.warn("Cannot create layout.", e);
 			}
 		}
 

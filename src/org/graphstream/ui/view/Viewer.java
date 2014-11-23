@@ -31,6 +31,12 @@
  */
 package org.graphstream.ui.view;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.security.AccessControlException;
+import java.util.Map;
+import java.util.TreeMap;
+import javax.swing.Timer;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -46,15 +52,8 @@ import org.graphstream.ui.swingViewer.DefaultView;
 import org.graphstream.ui.swingViewer.GraphRenderer;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.swingViewer.basicRenderer.SwingBasicGraphRenderer;
-
-import javax.swing.Timer;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.security.AccessControlException;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Set of views on a graphic graph.
@@ -107,7 +106,7 @@ public class Viewer implements ActionListener {
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(Viewer.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(Viewer.class);
 
 	// Attributes
 
@@ -334,7 +333,7 @@ public class Viewer implements ActionListener {
 			rendererClassName = System.getProperty("gs.ui.renderer");
 
 			if (rendererClassName != null) {
-                logger.warning("\"gs.ui.renderer\" is deprecated, use \"org.graphstream.ui.renderer\" instead.");
+                logger.warn("\"gs.ui.renderer\" is deprecated, use \"org.graphstream.ui.renderer\" instead.");
 			} else {
 				rendererClassName = System.getProperty("org.graphstream.ui.renderer");
 			}
@@ -352,10 +351,10 @@ public class Viewer implements ActionListener {
 			if (object instanceof GraphRenderer) {
 				return (GraphRenderer) object;
 			} else {
-				logger.warning(String.format("Class '%s' is not a 'GraphRenderer'.", object));
+				logger.warn(String.format("Class '%s' is not a 'GraphRenderer'.", object));
 			}
 		} catch (Exception e) {
-            logger.log(Level.WARNING, "Cannot create graph renderer.", e);
+            logger.warn("Cannot create graph renderer.", e);
 		}
 
 		return new SwingBasicGraphRenderer();

@@ -42,9 +42,9 @@ import org.miv.mbox.CannotPostException;
 import org.miv.mbox.MBox;
 import org.miv.mbox.MBoxListener;
 import org.miv.mbox.MBoxStandalone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Filter that allows to pass graph events between two threads without explicit
@@ -92,7 +92,7 @@ public class ThreadProxyPipeOld extends SourceBase implements ProxyPipe, MBoxLis
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(ThreadProxyPipe.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(ThreadProxyPipe.class);
 
 	/**
 	 * Proxy id.
@@ -330,7 +330,7 @@ public class ThreadProxyPipeOld extends SourceBase implements ProxyPipe, MBoxLis
 				Thread.yield();
 			}
 		} catch (CannotPostException e) {
-            logger.log(Level.WARNING, "Unable to post message to listeners.", e);
+            logger.warn("Unable to post message to listeners.", e);
 		}
 	}
 
@@ -643,7 +643,7 @@ public class ThreadProxyPipeOld extends SourceBase implements ProxyPipe, MBoxLis
 
 			sendGraphCleared(graphId, timeId);
 		} else {
-            logger.warning(String.format("Unknown message %s.", data[0]));
+            logger.warn(String.format("Unknown message %s.", data[0]));
 		}
 	}
 }

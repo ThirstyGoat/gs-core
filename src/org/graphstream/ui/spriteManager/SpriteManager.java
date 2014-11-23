@@ -31,18 +31,18 @@
  */
 package org.graphstream.ui.spriteManager;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 import org.graphstream.graph.Graph;
 import org.graphstream.stream.AttributeSink;
 import org.graphstream.ui.graphicGraph.stylesheet.Style;
 import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants.Units;
 import org.graphstream.ui.graphicGraph.stylesheet.Value;
 import org.graphstream.ui.graphicGraph.stylesheet.Values;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Set of sprites associated with a graph.
@@ -73,7 +73,7 @@ public class SpriteManager implements Iterable<Sprite>, AttributeSink {
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(SpriteManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(SpriteManager.class);
 
 	// Attribute
 
@@ -85,7 +85,7 @@ public class SpriteManager implements Iterable<Sprite>, AttributeSink {
 	/**
 	 * The set of sprites.
 	 */
-	protected HashMap<String, Sprite> sprites = new HashMap<String, Sprite>();
+	protected Map<String, Sprite> sprites = new TreeMap<String, Sprite>();
 
 	/**
 	 * Factory to create new sprites.
@@ -334,7 +334,7 @@ public class SpriteManager implements Iterable<Sprite>, AttributeSink {
 			sprite.init(identifier, this, position);
 			return sprite;
 		} catch (Exception e) {
-            logger.log(Level.WARNING, String.format("Error while trying to instantiate class %s.", spriteClass.getName()), e);
+            logger.warn(String.format("Error while trying to instantiate class %s.", spriteClass.getName()), e);
 		}
 		return null;
 	}
@@ -372,7 +372,7 @@ public class SpriteManager implements Iterable<Sprite>, AttributeSink {
 							((Number) values[1]).floatValue(),
 							((Number) values[2]).floatValue());
 				} else {
-					logger.warning("Cannot parse values[4] for sprite position.");
+					logger.warn("Cannot parse values[4] for sprite position.");
 				}
 			} else if (values.length == 3) {
 				if (values[0] instanceof Number && values[1] instanceof Number
@@ -382,17 +382,17 @@ public class SpriteManager implements Iterable<Sprite>, AttributeSink {
 							((Number) values[1]).floatValue(),
 							((Number) values[2]).floatValue());
 				} else {
-                    logger.warning("Cannot parse values[3] for sprite position.");
+                    logger.warn("Cannot parse values[3] for sprite position.");
 				}
 			} else if (values.length == 1) {
 				if (values[0] instanceof Number) {
 					return new Values(Units.GU,
 							((Number) values[0]).floatValue());
 				} else {
-					logger.warning(String.format("Sprite position percent is not a number."));
+					logger.warn(String.format("Sprite position percent is not a number."));
 				}
 			} else {
-				logger.warning(String.format("Cannot transform value '%s' (length=%d) into a position.", Arrays.toString(values), values.length));
+				logger.warn(String.format("Cannot transform value '%s' (length=%d) into a position.", Arrays.toString(values), values.length));
 			}
 		} else if (value instanceof Number) {
 			return new Values(Units.GU, ((Number) value).floatValue());
@@ -460,7 +460,7 @@ public class SpriteManager implements Iterable<Sprite>, AttributeSink {
 						Values position = getPositionValue(newValue);
 						s.setPosition(position);
 					} else {
-                        logger.warning(String.format("%s changed but newValue == null ! (old=%s).", spriteId, oldValue));
+                        logger.warn(String.format("%s changed but newValue == null ! (old=%s).", spriteId, oldValue));
 					}
 				} else {
 					throw new IllegalStateException("Sprite changed, but not added.");

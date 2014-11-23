@@ -31,14 +31,13 @@
  */
 package org.graphstream.ui.graphicGraph;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.graphstream.graph.implementations.AbstractElement;
 import org.graphstream.ui.graphicGraph.stylesheet.Selector;
 import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Super class of all graphic node, edge, and sprite elements.
@@ -74,7 +73,7 @@ public abstract class GraphicElement extends AbstractElement {
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(GraphicElement.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(GraphicElement.class);
 
 	/**
 	 * Interface for renderers registered in each style group.
@@ -224,11 +223,11 @@ public abstract class GraphicElement extends AbstractElement {
 									new Selector(getSelectorType(), getId(),
 											null), (String) newValue);
 						} catch (Exception e) {
-                            logger.log(Level.WARNING, String.format("Error while parsing style for %S '%s' :", getSelectorType(), getId()), e);
+                            logger.warn(String.format("Error while parsing style for %S '%s' :", getSelectorType(), getId()), e);
 						}
 						mygraph.graphChanged = true;
 					} else {
-						logger.warning("Unknown value for style [" + newValue + "].");
+						logger.warn("Unknown value for style [" + newValue + "].");
 					}
 				} else if (attribute.equals("ui.hide")) {
 					hidden = true;

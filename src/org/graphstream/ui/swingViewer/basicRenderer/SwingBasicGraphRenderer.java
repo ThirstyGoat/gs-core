@@ -31,6 +31,20 @@
  */
 package org.graphstream.ui.swingViewer.basicRenderer;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Collection;
+import javax.imageio.ImageIO;
 import org.graphstream.graph.Element;
 import org.graphstream.ui.geom.Point3;
 import org.graphstream.ui.graphicGraph.GraphicElement;
@@ -46,23 +60,8 @@ import org.graphstream.ui.swingViewer.util.DefaultCamera;
 import org.graphstream.ui.swingViewer.util.GraphMetrics;
 import org.graphstream.ui.swingViewer.util.Graphics2DOutput;
 import org.graphstream.ui.view.Camera;
-
-import javax.imageio.ImageIO;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Stroke;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A very simple view of the graph that respect only a subset of CSS.
@@ -81,7 +80,7 @@ import java.util.logging.Logger;
  */
 public class SwingBasicGraphRenderer extends GraphRendererBase {
 
-    private static final Logger logger = Logger.getLogger(SwingBasicGraphRenderer.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(SwingBasicGraphRenderer.class);
 
 	// Attribute
 
@@ -303,7 +302,7 @@ public class SwingBasicGraphRenderer extends GraphRendererBase {
 				}
 			}
 		} catch (Exception e) {
-			logger.log(Level.WARNING, "Unexpected error during graph render.", e);
+			logger.warn("Unexpected error during graph render.", e);
 		}
 	}
 
@@ -478,10 +477,10 @@ public class SwingBasicGraphRenderer extends GraphRendererBase {
 								(int) camera.getMetrics().viewport[3]);
 						out.outputTo(filename);
 					} else {
-                        logger.warning(String.format("Plugin %s is not an instance of Graphics2DOutput (%s).", plugin, o.getClass().getName()));
+                        logger.warn(String.format("Plugin %s is not an instance of Graphics2DOutput (%s).", plugin, o.getClass().getName()));
 					}
 				} catch (Exception e) {
-                    logger.log(Level.WARNING, "Unexpected error during screen shot.", e);
+                    logger.warn("Unexpected error during screen shot.", e);
 				}
 			}
 		}

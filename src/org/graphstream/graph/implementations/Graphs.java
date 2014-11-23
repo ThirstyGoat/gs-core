@@ -58,11 +58,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Graphs {
 
-    private static final Logger logger = Logger.getLogger(Graphs.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(Graphs.class);
 
 	public static Graph unmutableGraph(Graph g) {
 		return null;
@@ -107,7 +108,7 @@ public class Graphs {
 			Class<? extends Graph> cls = graphs[0].getClass();
 			result = cls.getConstructor(String.class).newInstance(id);
 		} catch (Exception e) {
-            logger.warning(String.format("Cannot create a graph of %s.", graphs[0].getClass().getName()));
+            logger.warn(String.format("Cannot create a graph of %s.", graphs[0].getClass().getName()));
 			result = new MultiGraph(id);
 		}
 
@@ -155,7 +156,7 @@ public class Graphs {
 			Class<? extends Graph> cls = g.getClass();
 			copy = cls.getConstructor(String.class).newInstance(g.getId());
 		} catch (Exception e) {
-            logger.warning(String.format("Cannot create a graph of %s.", g.getClass().getName()));
+            logger.warn(String.format("Cannot create a graph of %s.", g.getClass().getName()));
 			copy = new AdjacencyListGraph(g.getId());
 		}
 

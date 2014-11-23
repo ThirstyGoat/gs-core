@@ -31,8 +31,9 @@
  */
 package org.graphstream.graph;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * An interface aimed at dynamically creating graph objects based on a class
@@ -42,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class GraphFactory {
 
-    private static final Logger logger = Logger.getLogger(GraphFactory.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(GraphFactory.class);
 
 	/**
 	 * Create a new instance of graph.
@@ -72,7 +73,7 @@ public class GraphFactory {
 					id);
 			return res;
 		}  catch (final Exception e) {
-            logger.log(Level.SEVERE, "Error executing GraphFactory#newInstance.", e);
+            logger.warn("Error executing GraphFactory#newInstance.", e);
         }
 		return null;
 	}

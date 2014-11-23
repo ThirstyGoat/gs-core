@@ -31,6 +31,15 @@
  */
 package org.graphstream.ui.swingViewer.util;
 
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.geom.Point2;
 import org.graphstream.ui.geom.Point3;
@@ -46,18 +55,8 @@ import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants.Units;
 import org.graphstream.ui.graphicGraph.stylesheet.Values;
 import org.graphstream.ui.view.Camera;
 import org.graphstream.ui.view.util.CubicCurve;
-
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Define how the graph is viewed.
@@ -88,7 +87,7 @@ public class DefaultCamera implements Camera
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(DefaultCamera.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(DefaultCamera.class);
 
     // Attribute
 
@@ -466,7 +465,7 @@ public class DefaultCamera implements Camera
     }
 
     public void removeGraphViewport() {
-        logger.fine("Graph viewport removed for [" + this + "].");
+        logger.debug("Graph viewport removed for [" + this + "].");
         gviewport = null;
         resetView();
     }
@@ -552,7 +551,7 @@ public class DefaultCamera implements Camera
         try {
             xT.invert();
         } catch (NoninvertibleTransformException e) {
-            logger.warning("Cannot inverse gu2px matrix.");
+            logger.warn("Cannot inverse gu2px matrix.");
         }
 
         zoom = 1;
@@ -604,7 +603,7 @@ public class DefaultCamera implements Camera
         try {
             xT.invert();
         } catch (NoninvertibleTransformException e) {
-            logger.log(Level.WARNING, "Cannot inverse gu2px matrix.", e);
+            logger.warn("Cannot inverse gu2px matrix.", e);
         }
 
         metrics.setRatioPx2Gu(sx);

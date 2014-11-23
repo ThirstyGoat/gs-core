@@ -31,7 +31,6 @@
  */
 package org.graphstream.ui.swingViewer.util;
 
-import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -41,8 +40,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple cache for images to avoid reloading them constantly and to allow
@@ -56,12 +56,12 @@ public class ImageCache {
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(DefaultCamera.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(ImageCache.class);
 
 	/**
 	 * The image cache.
 	 */
-	protected final Map<String, Image> imageCache = new TreeMap<String, Image>();
+	protected final Map<String, Image> imageCache = new TreeMap<>();
 
 	/**
 	 * The dummy image used to mark a not found image (and avoid trying to
@@ -142,7 +142,7 @@ public class ImageCache {
 					ii = ImageIO.read(url);
 					imageCache.put(fileNameOrUrl, ii);
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.warn("Unable to read image from url [" + url +"].", e);
 				}
 			} else {
 				try {
@@ -156,7 +156,7 @@ public class ImageCache {
 						imageCache.put(fileNameOrUrl, ii);
 					} catch (IOException ee) {
 						imageCache.put(fileNameOrUrl, dummy);
-                        logger.log(Level.WARNING, String.format("Cannot read image '%s'.", fileNameOrUrl), e);
+                        logger.warn(String.format("Cannot read image '%s'.", fileNameOrUrl), e);
 					}
 				}
 			}

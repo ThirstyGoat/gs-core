@@ -34,11 +34,11 @@ package org.graphstream.ui.swingViewer.util;
 import org.graphstream.ui.geom.Point3;
 import org.graphstream.ui.geom.Vector3;
 import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants;
+import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants.Units;
 import org.graphstream.ui.graphicGraph.stylesheet.Value;
 import org.graphstream.ui.graphicGraph.stylesheet.Values;
-import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants.Units;
-
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * p Various geometric informations on the graphic graph.
@@ -59,7 +59,7 @@ public class GraphMetrics {
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(GraphMetrics.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(GraphMetrics.class);
 
 	// Attribute
 
@@ -305,7 +305,7 @@ public class GraphMetrics {
 			throw new IllegalArgumentException();
 		}
 
-		logger.fine(String.format("%spixel[%d] %d --> %fgu", this, index, pixels, l));
+		logger.debug(String.format("%spixel[%d] %d --> %fgu", this, index, pixels, l));
 
 		return l;
 	}

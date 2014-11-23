@@ -43,7 +43,8 @@ import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Filter that allows to pass graph events between two threads without explicit
@@ -87,7 +88,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(ThreadProxyPipe.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(ThreadProxyPipe.class);
 
 	/**
 	 * Proxy id.
@@ -614,7 +615,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 			sendGraphCleared(graphId, timeId);
 			break;
 		default:
-            logger.warning(String.format("Unknown message %s.", e));
+            logger.warn(String.format("Unknown message %s.", e));
 			break;
 		}
 	}

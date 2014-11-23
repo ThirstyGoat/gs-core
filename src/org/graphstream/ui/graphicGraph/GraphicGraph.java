@@ -66,8 +66,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Graph representation used in display classes.
@@ -140,7 +140,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(GraphicGraph.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(GraphicGraph.class);
 
 	/**
 	 * Set of styles.
@@ -458,10 +458,10 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 						styleSheet.load((String) newValue);
 						graphChanged = true;
 					} catch (Exception e) {
-                        logger.log(Level.WARNING, String.format("Error while parsing style sheet for graph '%s'.", getId()), e);
+                        logger.warn(String.format("Error while parsing style sheet for graph '%s'.", getId()), e);
 					}
 				} else {
-                    logger.warning(String.format("Error with stylesheet specification what to do with '%s'.", newValue));
+                    logger.warn(String.format("Error with stylesheet specification what to do with '%s'.", newValue));
 				}
 			} else // Remove the style.
 			{
@@ -1123,7 +1123,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 							((Number) values[2]).doubleValue(),
 							(Style.Units) values[3]);
 				} else {
-                    logger.warning("Cannot parse values[4] for sprite position.");
+                    logger.warn("Cannot parse values[4] for sprite position.");
 				}
 			} else if (values.length == 3) {
 				if (values[0] instanceof Number && values[1] instanceof Number
@@ -1132,16 +1132,16 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 							((Number) values[1]).doubleValue(),
 							((Number) values[2]).doubleValue(), Units.GU);
 				} else {
-                    logger.warning("Cannot parse values[3] for sprite position.");
+                    logger.warn("Cannot parse values[3] for sprite position.");
 				}
 			} else if (values.length == 1) {
 				if (values[0] instanceof Number) {
 					sprite.setPosition(((Number) values[0]).doubleValue());
 				} else {
-                    logger.warning("Sprite position percent is not a number.");
+                    logger.warn("Sprite position percent is not a number.");
 				}
 			} else {
-                logger.warning(String.format("Cannot transform value '%s' (length=%d) into a position%n", Arrays.toString(values), values.length));
+                logger.warn(String.format("Cannot transform value '%s' (length=%d) into a position%n", Arrays.toString(values), values.length));
 			}
 		} else if (value instanceof Number) {
 			sprite.setPosition(((Number) value).doubleValue());
@@ -1152,7 +1152,7 @@ public class GraphicGraph extends AbstractElement implements Graph, StyleGroupLi
 		} else if (value == null) {
 			throw new RuntimeException("What do you expect with a null value ?");
 		} else {
-			logger.warning(String.format("Cannot place sprite with posiiton '%s' (instance of %s)%n", value, value.getClass().getName()));
+			logger.warn(String.format("Cannot place sprite with posiiton '%s' (instance of %s)%n", value, value.getClass().getName()));
 		}
 	}
 

@@ -29,25 +29,27 @@
  */
 package org.graphstream.util.cumulative;
 
+import java.util.Map;
+import java.util.TreeMap;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.AdjacencyListGraph;
 import org.graphstream.stream.Sink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.logging.Logger;
 
 public class GraphSpells implements Sink {
-    private static final Logger logger = Logger.getLogger(GraphSpells.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(GraphSpells.class);
 
 	CumulativeSpells graph;
 	CumulativeAttributes graphAttributes;
 
-	HashMap<String, CumulativeSpells> nodes;
-	HashMap<String, CumulativeAttributes> nodesAttributes;
+	Map<String, CumulativeSpells> nodes;
+	Map<String, CumulativeAttributes> nodesAttributes;
 
-	HashMap<String, CumulativeSpells> edges;
-	HashMap<String, CumulativeAttributes> edgesAttributes;
-	HashMap<String, EdgeData> edgesData;
+	Map<String, CumulativeSpells> edges;
+	Map<String, CumulativeAttributes> edgesAttributes;
+	Map<String, EdgeData> edgesData;
 
 	double date;
 
@@ -55,12 +57,12 @@ public class GraphSpells implements Sink {
 		graph = new CumulativeSpells();
 		graphAttributes = new CumulativeAttributes(0);
 
-		nodes = new HashMap<String, CumulativeSpells>();
-		nodesAttributes = new HashMap<String, CumulativeAttributes>();
+		nodes = new TreeMap<String, CumulativeSpells>();
+		nodesAttributes = new TreeMap<String, CumulativeAttributes>();
 
-		edges = new HashMap<String, CumulativeSpells>();
-		edgesAttributes = new HashMap<String, CumulativeAttributes>();
-		edgesData = new HashMap<String, EdgeData>();
+		edges = new TreeMap<String, CumulativeSpells>();
+		edgesAttributes = new TreeMap<String, CumulativeAttributes>();
+		edgesData = new TreeMap<String, EdgeData>();
 
 		date = Double.NaN;
 	}
@@ -164,7 +166,7 @@ public class GraphSpells implements Sink {
 
 		if (!data.source.equals(fromNodeId) || !data.target.equals(toNodeId)
 				|| data.directed != directed)
-            logger.warning("An edge with this id but different properties"
+            logger.warn("An edge with this id but different properties"
 					+ " has already be created in the past.");
 	}
 

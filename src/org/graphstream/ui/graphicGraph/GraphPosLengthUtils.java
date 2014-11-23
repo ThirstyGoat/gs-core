@@ -38,8 +38,9 @@ import org.graphstream.ui.geom.Point2;
 import org.graphstream.ui.geom.Point3;
 import org.graphstream.ui.geom.Vector2;
 import org.graphstream.ui.geom.Vector3;
+import org.slf4j.Logger;
 
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Lots of small often used measuring algorithms on graphs.
@@ -53,7 +54,7 @@ public class GraphPosLengthUtils {
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(GraphPosLengthUtils.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(GraphPosLengthUtils.class);
 
 	/**
 	 * Retrieve a node position from its attributes ("x", "y", "z", or "xy", or
@@ -332,7 +333,7 @@ public class GraphPosLengthUtils {
 			xyz[1] = oo.data[1];
 			xyz[2] = 0;
 		} else {
-			logger.warning(String.format("Do not know how to handle xyz attribute %s.", o.getClass().getName()));
+			logger.warn(String.format("Do not know how to handle xyz attribute %s.", o.getClass().getName()));
 		}
 	}
 	
@@ -407,7 +408,7 @@ public class GraphPosLengthUtils {
 			pos.y = oo.data[1];
 			pos.z = 0;
 		} else {
-            logger.warning(String.format("Do not know how to handle xyz attribute %s%n", o.getClass().getName()));
+            logger.warn(String.format("Do not know how to handle xyz attribute %s%n", o.getClass().getName()));
 		}
 	}
 

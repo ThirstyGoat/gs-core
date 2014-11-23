@@ -35,9 +35,9 @@ import org.graphstream.graph.Graph;
 import org.graphstream.stream.ProxyPipe;
 import org.graphstream.stream.Source;
 import org.graphstream.stream.thread.ThreadProxyPipe;
+import org.slf4j.Logger;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Allows to run a layout in a distinct thread.
@@ -73,7 +73,7 @@ public class LayoutRunner extends Thread {
     /**
      * class level logger
      */
-    private static final Logger logger = Logger.getLogger(LayoutRunner.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(LayoutRunner.class);
 
 	/**
 	 * The layout algorithm.
@@ -215,7 +215,7 @@ public class LayoutRunner extends Thread {
 			try {
 				this.join();
 			} catch (Exception e) {
-                logger.log(Level.WARNING, "Unable to stop/release layout.", e);
+                logger.warn("Unable to stop/release layout.", e);
 			}
 		}
 

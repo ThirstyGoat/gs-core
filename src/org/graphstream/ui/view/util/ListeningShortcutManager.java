@@ -16,8 +16,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * a key / shortcut manager with node listener callbacks
  * <p>
- * User: bowen
- * Date: 11/15/14
+ * User: bowen Date: 11/15/14
  */
 public class ListeningShortcutManager implements ShortcutManager
 {
@@ -35,7 +34,6 @@ public class ListeningShortcutManager implements ShortcutManager
 
     private SelectionModel selectionModel = EmptySelectionModel.getInstance();
 
-
     @Override
     public void init(final GraphicGraph graph, final View view)
     {
@@ -43,7 +41,6 @@ public class ListeningShortcutManager implements ShortcutManager
         this.view = view;
         view.addKeyListener(this);
     }
-
 
     @Override
     public void release()
@@ -60,7 +57,6 @@ public class ListeningShortcutManager implements ShortcutManager
         this.selectionModel.clear();
     }
 
-
     public boolean addListener(final NodeListener l)
     {
         if (null == l)
@@ -69,7 +65,6 @@ public class ListeningShortcutManager implements ShortcutManager
         }
         return this.listeners.add(l);
     }
-
 
     public boolean removeListener(final NodeListener l)
     {
@@ -80,12 +75,10 @@ public class ListeningShortcutManager implements ShortcutManager
         return this.listeners.remove(l);
     }
 
-
     public SelectionModel getSelectionModel()
     {
         return selectionModel;
     }
-
 
     public void setSelectionModel(final SelectionModel model)
     {
@@ -95,7 +88,6 @@ public class ListeningShortcutManager implements ShortcutManager
         }
         this.selectionModel = model;
     }
-
 
     @Override
     public void keyPressed(final KeyEvent event)
@@ -109,7 +101,7 @@ public class ListeningShortcutManager implements ShortcutManager
         else if (event.getKeyCode() == KeyEvent.VK_PAGE_UP)
         {
             camera.setViewPercent(Math.max(0.0001f,
-                camera.getViewPercent() * 0.9f));
+                    camera.getViewPercent() * 0.9f));
         }
         else if (event.getKeyCode() == KeyEvent.VK_PAGE_DOWN)
         {
@@ -205,13 +197,11 @@ public class ListeningShortcutManager implements ShortcutManager
         }
     }
 
-
     @Override
     public void keyReleased(final KeyEvent event)
     {
 
     }
-
 
     @Override
     public void keyTyped(final KeyEvent event)
@@ -221,7 +211,6 @@ public class ListeningShortcutManager implements ShortcutManager
             this.view.getCamera().resetView();
         }
     }
-
 
     private void clearSelected()
     {
@@ -240,7 +229,6 @@ public class ListeningShortcutManager implements ShortcutManager
             }
         }
     }
-
 
     protected void fireRemoved(final String id, final GraphicElement element)
     {

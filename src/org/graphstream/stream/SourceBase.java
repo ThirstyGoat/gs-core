@@ -31,12 +31,13 @@
  */
 package org.graphstream.stream;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Set;
 import org.graphstream.graph.Element.AttributeChangeEvent;
 import org.graphstream.stream.sync.SourceTime;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Base implementation of an input that provide basic sink handling.
@@ -70,34 +71,34 @@ public abstract class SourceBase implements Source {
 	/**
 	 * Set of graph attributes sinks.
 	 */
-	protected ArrayList<AttributeSink> attrSinks = new ArrayList<AttributeSink>();
+	private final Set<AttributeSink> attrSinks = new HashSet<>();
 
 	/**
 	 * Set of graph elements sinks.
 	 */
-	protected ArrayList<ElementSink> eltsSinks = new ArrayList<ElementSink>();
+    private final Set<ElementSink> eltsSinks = new HashSet<>();
 
 	/**
 	 * A queue that allow the management of events (nodes/edge
 	 * add/delete/change) in the right order.
 	 */
-	protected LinkedList<GraphEvent> eventQueue = new LinkedList<GraphEvent>();
+    private final Queue<GraphEvent> eventQueue = new ArrayDeque<>();
 
 	/**
 	 * A boolean that indicates whether or not an Sink event is being sent
 	 * during another one.
 	 */
-	protected boolean eventProcessing = false;
+    private boolean eventProcessing = false;
 
 	/**
 	 * Id of this source.
 	 */
-	protected String sourceId;
+    protected String sourceId;
 	
 	/**
 	 * Time of this source.
 	 */
-	protected SourceTime sourceTime;
+    protected SourceTime sourceTime;
 
 	// Construction
 
@@ -124,11 +125,13 @@ public abstract class SourceBase implements Source {
 
 	// Command
 
+    @Override
 	public void addSink(Sink sink) {
 		addAttributeSink(sink);
 		addElementSink(sink);
 	}
 
+    @Override
 	public void addAttributeSink(AttributeSink sink) {
 		if (!eventProcessing) {
 			eventProcessing = true;
@@ -139,10 +142,11 @@ public abstract class SourceBase implements Source {
 			manageEvents();
 			eventProcessing = false;
 		} else {
-			eventQueue.add(new AddToListEvent<AttributeSink>(attrSinks, sink));
+			eventQueue.add(new AddToListEvent<>(attrSinks, sink));
 		}
 	}
 
+    @Override
 	public void addElementSink(ElementSink sink) {
 		if (!eventProcessing) {
 			eventProcessing = true;
@@ -153,15 +157,17 @@ public abstract class SourceBase implements Source {
 			manageEvents();
 			eventProcessing = false;
 		} else {
-			eventQueue.add(new AddToListEvent<ElementSink>(eltsSinks, sink));
+			eventQueue.add(new AddToListEvent<>(eltsSinks, sink));
 		}
 	}
 
+    @Override
 	public void clearSinks() {
 		clearElementSinks();
 		clearAttributeSinks();
 	}
 
+    @Override
 	public void clearElementSinks() {
 		if (!eventProcessing) {
 			eventProcessing = true;
@@ -172,10 +178,11 @@ public abstract class SourceBase implements Source {
 			manageEvents();
 			eventProcessing = false;
 		} else {
-			eventQueue.add(new ClearListEvent<ElementSink>(eltsSinks));
+			eventQueue.add(new ClearListEvent<>(eltsSinks));
 		}
 	}
 
+    @Override
 	public void clearAttributeSinks() {
 		if (!eventProcessing) {
 			eventProcessing = true;
@@ -186,15 +193,17 @@ public abstract class SourceBase implements Source {
 			manageEvents();
 			eventProcessing = false;
 		} else {
-			eventQueue.add(new ClearListEvent<AttributeSink>(attrSinks));
+			eventQueue.add(new ClearListEvent<>(attrSinks));
 		}
 	}
 
+    @Override
 	public void removeSink(Sink sink) {
 		removeAttributeSink(sink);
 		removeElementSink(sink);
 	}
 
+    @Override
 	public void removeAttributeSink(AttributeSink sink) {
 		if (!eventProcessing) {
 			eventProcessing = true;
@@ -205,11 +214,12 @@ public abstract class SourceBase implements Source {
 			manageEvents();
 			eventProcessing = false;
 		} else {
-			eventQueue.add(new RemoveFromListEvent<AttributeSink>(attrSinks,
+			eventQueue.add(new RemoveFromListEvent<>(attrSinks,
 					sink));
 		}
 	}
 
+    @Override
 	public void removeElementSink(ElementSink sink) {
 		if (!eventProcessing) {
 			eventProcessing = true;
@@ -221,7 +231,7 @@ public abstract class SourceBase implements Source {
 			eventProcessing = false;
 		} else {
 			eventQueue
-					.add(new RemoveFromListEvent<ElementSink>(eltsSinks, sink));
+					.add(new RemoveFromListEvent<>(eltsSinks, sink));
 		}
 	}
 
@@ -247,8 +257,8 @@ public abstract class SourceBase implements Source {
 			eventProcessing = true;
 			manageEvents();
 
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).graphCleared(sourceId, timeId);
+            for (final ElementSink sink : this.eltsSinks)
+				sink.graphCleared(sourceId, timeId);
 
 			manageEvents();
 			eventProcessing = false;
@@ -283,8 +293,8 @@ public abstract class SourceBase implements Source {
 			eventProcessing = true;
 			manageEvents();
 
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).stepBegins(sourceId, timeId, step);
+            for (final ElementSink sink : this.eltsSinks)
+                sink.stepBegins(sourceId, timeId, step);
 
 			manageEvents();
 			eventProcessing = false;
@@ -319,8 +329,8 @@ public abstract class SourceBase implements Source {
 			eventProcessing = true;
 			manageEvents();
 
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).nodeAdded(sourceId, timeId, nodeId);
+            for (final ElementSink sink : this.eltsSinks)
+				sink.nodeAdded(sourceId, timeId, nodeId);
 
 			manageEvents();
 			eventProcessing = false;
@@ -355,8 +365,8 @@ public abstract class SourceBase implements Source {
 			eventProcessing = true;
 			manageEvents();
 
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).nodeRemoved(sourceId, timeId, nodeId);
+            for (final ElementSink sink : this.eltsSinks)
+				sink.nodeRemoved(sourceId, timeId, nodeId);
 
 			manageEvents();
 			eventProcessing = false;
@@ -406,9 +416,8 @@ public abstract class SourceBase implements Source {
 			eventProcessing = true;
 			manageEvents();
 
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).edgeAdded(sourceId, timeId, edgeId,
-						fromNodeId, toNodeId, directed);
+            for (final ElementSink sink : this.eltsSinks)
+				sink.edgeAdded(sourceId, timeId, edgeId, fromNodeId, toNodeId, directed);
 
 			manageEvents();
 			eventProcessing = false;
@@ -444,8 +453,8 @@ public abstract class SourceBase implements Source {
 			eventProcessing = true;
 			manageEvents();
 
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).edgeRemoved(sourceId, timeId, edgeId);
+            for (final ElementSink sink : this.eltsSinks)
+				sink.edgeRemoved(sourceId, timeId, edgeId);
 
 			manageEvents();
 			eventProcessing = false;
@@ -811,45 +820,36 @@ public abstract class SourceBase implements Source {
 
 			if (event == AttributeChangeEvent.ADD) {
 				if (eltType == ElementType.NODE) {
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).nodeAttributeAdded(sourceId, timeId,
-								eltId, attribute, newValue);
+                    for (final AttributeSink sink : this.attrSinks)
+                        sink.nodeAttributeAdded(sourceId, timeId, eltId, attribute, newValue);
 				} else if (eltType == ElementType.EDGE) {
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).edgeAttributeAdded(sourceId, timeId,
-								eltId, attribute, newValue);
+                    for (final AttributeSink sink : this.attrSinks)
+                        sink.edgeAttributeAdded(sourceId, timeId, eltId, attribute, newValue);
 				} else {
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).graphAttributeAdded(sourceId, timeId,
-								attribute, newValue);
+                    for (final AttributeSink sink : this.attrSinks)
+                        sink.graphAttributeAdded(sourceId, timeId, attribute, newValue);
 				}
 			} else if (event == AttributeChangeEvent.REMOVE) {
 				if (eltType == ElementType.NODE) {
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).nodeAttributeRemoved(sourceId, timeId,
-								eltId, attribute);
+                    for (final AttributeSink sink : this.attrSinks)
+                        sink.nodeAttributeRemoved(sourceId, timeId, eltId, attribute);
 				} else if (eltType == ElementType.EDGE) {
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).edgeAttributeRemoved(sourceId, timeId,
-								eltId, attribute);
+                    for (final AttributeSink sink : this.attrSinks)
+                        sink.edgeAttributeRemoved(sourceId, timeId, eltId, attribute);
 				} else {
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).graphAttributeRemoved(sourceId,
-								timeId, attribute);
+                    for (final AttributeSink sink : this.attrSinks)
+                        sink.graphAttributeRemoved(sourceId, timeId, attribute);
 				}
 			} else {
 				if (eltType == ElementType.NODE) {
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).nodeAttributeChanged(sourceId, timeId,
-								eltId, attribute, oldValue, newValue);
+                    for (final AttributeSink sink : this.attrSinks)
+                        sink.nodeAttributeChanged(sourceId, timeId, eltId, attribute, oldValue, newValue);
 				} else if (eltType == ElementType.EDGE) {
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).edgeAttributeChanged(sourceId, timeId,
-								eltId, attribute, oldValue, newValue);
+                    for (final AttributeSink sink : this.attrSinks)
+                        sink.edgeAttributeChanged(sourceId, timeId, eltId, attribute, oldValue, newValue);
 				} else {
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).graphAttributeChanged(sourceId,
-								timeId, attribute, oldValue, newValue);
+                    for (final AttributeSink sink : this.attrSinks)
+                        sink.graphAttributeChanged(sourceId, timeId, attribute, oldValue, newValue);
 				}
 			}
 
@@ -866,7 +866,7 @@ public abstract class SourceBase implements Source {
 	/**
 	 * If in "event processing mode", ensure all pending events are processed.
 	 */
-	protected void manageEvents() {
+	private void manageEvents() {
 		if (eventProcessing) {
 			while (!eventQueue.isEmpty())
 				eventQueue.remove().trigger();
@@ -879,9 +879,9 @@ public abstract class SourceBase implements Source {
 	 * Interface that provide general purpose classification for evens involved
 	 * in graph modifications
 	 */
-	abstract class GraphEvent {
-		String sourceId;
-		long timeId;
+	private abstract class GraphEvent {
+        protected final String sourceId;
+        protected final long timeId;
 
 		GraphEvent(String sourceId, long timeId) {
 			this.sourceId = sourceId;
@@ -891,11 +891,11 @@ public abstract class SourceBase implements Source {
 		abstract void trigger();
 	}
 
-	class AfterEdgeAddEvent extends GraphEvent {
-		String edgeId;
-		String fromNodeId;
-		String toNodeId;
-		boolean directed;
+	private class AfterEdgeAddEvent extends GraphEvent {
+		private final String edgeId;
+        private final String fromNodeId;
+        private final String toNodeId;
+        private final boolean directed;
 
 		AfterEdgeAddEvent(String sourceId, long timeId, String edgeId,
 				String fromNodeId, String toNodeId, boolean directed) {
@@ -906,92 +906,92 @@ public abstract class SourceBase implements Source {
 			this.directed = directed;
 		}
 
+        @Override
 		void trigger() {
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).edgeAdded(sourceId, timeId, edgeId,
-						fromNodeId, toNodeId, directed);
+            for (final ElementSink sink : eltsSinks)
+                sink.edgeAdded(sourceId, timeId, edgeId, fromNodeId, toNodeId, directed);
 		}
 	}
 
-	class BeforeEdgeRemoveEvent extends GraphEvent {
-		String edgeId;
+	private class BeforeEdgeRemoveEvent extends GraphEvent {
+		private final String edgeId;
 
 		BeforeEdgeRemoveEvent(String sourceId, long timeId, String edgeId) {
 			super(sourceId, timeId);
 			this.edgeId = edgeId;
 		}
 
+        @Override
 		void trigger() {
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).edgeRemoved(sourceId, timeId, edgeId);
+            for (final ElementSink sink : eltsSinks)
+                sink.edgeRemoved(sourceId, timeId, edgeId);
 		}
 	}
 
-	class AfterNodeAddEvent extends GraphEvent {
-		String nodeId;
+	private class AfterNodeAddEvent extends GraphEvent {
+		private final String nodeId;
 
 		AfterNodeAddEvent(String sourceId, long timeId, String nodeId) {
 			super(sourceId, timeId);
 			this.nodeId = nodeId;
 		}
 
+        @Override
 		void trigger() {
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).nodeAdded(sourceId, timeId, nodeId);
+            for (final ElementSink sink : eltsSinks)
+                sink.nodeAdded(sourceId, timeId, nodeId);
 		}
 	}
 
-	class BeforeNodeRemoveEvent extends GraphEvent {
-		String nodeId;
+	private class BeforeNodeRemoveEvent extends GraphEvent {
+		private final String nodeId;
 
 		BeforeNodeRemoveEvent(String sourceId, long timeId, String nodeId) {
 			super(sourceId, timeId);
 			this.nodeId = nodeId;
 		}
 
+        @Override
 		void trigger() {
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).nodeRemoved(sourceId, timeId, nodeId);
+            for (final ElementSink sink : eltsSinks)
+                sink.nodeRemoved(sourceId, timeId, nodeId);
 		}
 	}
 
-	class BeforeGraphClearEvent extends GraphEvent {
+	private class BeforeGraphClearEvent extends GraphEvent {
 		BeforeGraphClearEvent(String sourceId, long timeId) {
 			super(sourceId, timeId);
 		}
 
+        @Override
 		void trigger() {
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).graphCleared(sourceId, timeId);
+            for (final ElementSink sink : eltsSinks)
+                sink.graphCleared(sourceId, timeId);
 		}
 	}
 
-	class StepBeginsEvent extends GraphEvent {
-		double step;
+	private class StepBeginsEvent extends GraphEvent {
+		private final double step;
 
 		StepBeginsEvent(String sourceId, long timeId, double step) {
 			super(sourceId, timeId);
 			this.step = step;
 		}
 
+        @Override
 		void trigger() {
-			for (int i = 0; i < eltsSinks.size(); i++)
-				eltsSinks.get(i).stepBegins(sourceId, timeId, step);
+            for (final ElementSink sink : eltsSinks)
+                sink.stepBegins(sourceId, timeId, step);
 		}
 	}
 
-	class AttributeChangedEvent extends GraphEvent {
-		ElementType eltType;
-
-		String eltId;
-
-		String attribute;
-
-		AttributeChangeEvent event;
-
-		Object oldValue;
-
-		Object newValue;
+	private class AttributeChangedEvent extends GraphEvent {
+        private final ElementType eltType;
+        private final String eltId;
+        private final String attribute;
+        private final AttributeChangeEvent event;
+        private final Object oldValue;
+		private final Object newValue;
 
 		AttributeChangedEvent(String sourceId, long timeId, String eltId,
 				ElementType eltType, String attribute,
@@ -1005,103 +1005,98 @@ public abstract class SourceBase implements Source {
 			this.newValue = newValue;
 		}
 
+        @Override
 		void trigger() {
 			switch (event) {
 			case ADD:
 				switch (eltType) {
 				case NODE:
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).nodeAttributeAdded(sourceId, timeId,
-								eltId, attribute, newValue);
+                    for (final AttributeSink sink : attrSinks)
+                        sink.nodeAttributeAdded(sourceId, timeId, eltId, attribute, newValue);
 					break;
 				case EDGE:
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).edgeAttributeAdded(sourceId, timeId,
-								eltId, attribute, newValue);
+                    for (final AttributeSink sink : attrSinks)
+                        sink.edgeAttributeAdded(sourceId, timeId, eltId, attribute, newValue);
 					break;
 				default:
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).graphAttributeAdded(sourceId, timeId,
-								attribute, newValue);
+                    for (final AttributeSink sink : attrSinks)
+						sink.graphAttributeAdded(sourceId, timeId, attribute, newValue);
 				}
 				break;
 			case REMOVE:
 				switch (eltType) {
 				case NODE:
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).nodeAttributeRemoved(sourceId, timeId,
-								eltId, attribute);
+                    for (final AttributeSink sink : attrSinks)
+                        sink.nodeAttributeRemoved(sourceId, timeId, eltId, attribute);
 					break;
 				case EDGE:
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).edgeAttributeRemoved(sourceId, timeId,
-								eltId, attribute);
+                    for (final AttributeSink sink : attrSinks)
+                        sink.edgeAttributeRemoved(sourceId, timeId, eltId, attribute);
 					break;
 				default:
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).graphAttributeRemoved(sourceId,
-								timeId, attribute);
+                    for (final AttributeSink sink : attrSinks)
+                        sink.graphAttributeRemoved(sourceId, timeId, attribute);
 				}
 				break;
 			default:
 				switch (eltType) {
 				case NODE:
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).nodeAttributeChanged(sourceId, timeId,
-								eltId, attribute, oldValue, newValue);
+                    for (final AttributeSink sink : attrSinks)
+                        sink.nodeAttributeChanged(sourceId, timeId, eltId, attribute, oldValue, newValue);
 					break;
 				case EDGE:
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).edgeAttributeChanged(sourceId, timeId,
-								eltId, attribute, oldValue, newValue);
+                    for (final AttributeSink sink : attrSinks)
+                        sink.edgeAttributeChanged(sourceId, timeId, eltId, attribute, oldValue, newValue);
 					break;
 				default:
-					for (int i = 0; i < attrSinks.size(); i++)
-						attrSinks.get(i).graphAttributeChanged(sourceId,
-								timeId, attribute, oldValue, newValue);
+                    for (final AttributeSink sink : attrSinks)
+                        sink.graphAttributeChanged(sourceId, timeId, attribute, oldValue, newValue);
 				}
 			}
 		}
 	}
 
-	class AddToListEvent<T> extends GraphEvent {
-		List<T> l;
-		T obj;
+	private class AddToListEvent<T> extends GraphEvent {
+		private final Collection<T> l;
+        private final T obj;
 
-		AddToListEvent(List<T> l, T obj) {
+		AddToListEvent(final Collection<T> l, T obj) {
 			super(null, -1);
 			this.l = l;
 			this.obj = obj;
 		}
 
+        @Override
 		void trigger() {
 			l.add(obj);
 		}
 	}
 
-	class RemoveFromListEvent<T> extends GraphEvent {
-		List<T> l;
-		T obj;
+    private class RemoveFromListEvent<T> extends GraphEvent {
+        private final Collection<T> l;
+		private final T obj;
 
-		RemoveFromListEvent(List<T> l, T obj) {
+		RemoveFromListEvent(Collection<T> l, T obj) {
 			super(null, -1);
 			this.l = l;
 			this.obj = obj;
 		}
 
+        @Override
 		void trigger() {
 			l.remove(obj);
 		}
 	}
 
-	class ClearListEvent<T> extends GraphEvent {
-		List<T> l;
+	private class ClearListEvent<T> extends GraphEvent {
+        private final Collection<T> l;
 
-		ClearListEvent(List<T> l) {
+		ClearListEvent(Collection<T> l) {
 			super(null, -1);
 			this.l = l;
 		}
 
+        @Override
 		void trigger() {
 			l.clear();
 		}

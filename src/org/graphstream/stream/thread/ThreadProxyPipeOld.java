@@ -236,12 +236,7 @@ public class ThreadProxyPipeOld extends SourceBase implements ProxyPipe, MBoxLis
 
 	@Override
 	public String toString() {
-		String dest = "nil";
-
-		if (attrSinks.size() > 0)
-			dest = attrSinks.get(0).toString();
-
-		return String.format("thread-proxy(from %s to %s)", from, dest);
+		return String.format("thread-proxy(from %s)", from);
 	}
 
 	/**

@@ -88,29 +88,17 @@ public class ViewerPipe extends SourceBase implements ProxyPipe {
 
 	// Commands
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.graphstream.stream.ProxyPipe#pump()
-	 */
+    @Override
 	public void pump() {
 		pipeIn.pump();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.graphstream.stream.ProxyPipe#blockingPump()
-	 */
+    @Override
 	public void blockingPump() throws InterruptedException {
 		pipeIn.blockingPump();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.graphstream.stream.ProxyPipe#blockingPump(long)
-	 */
+	@Override
 	public void blockingPump(long timeout) throws InterruptedException {
 		pipeIn.blockingPump(timeout);
 	}

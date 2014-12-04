@@ -525,6 +525,7 @@ public class Viewer implements ActionListener {
 	 * triggers a repaint. Never call this method, it is called by a Swing Timer
 	 * automatically.
 	 */
+    @Override
 	public void actionPerformed(ActionEvent e) {
 		synchronized (views) {
 			// long t1=System.currentTimeMillis();

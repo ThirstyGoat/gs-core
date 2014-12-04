@@ -31,6 +31,9 @@
  */
 package org.graphstream.stream.thread;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import org.graphstream.graph.Graph;
 import org.graphstream.stream.ProxyPipe;
 import org.graphstream.stream.Replayable;
@@ -38,11 +41,6 @@ import org.graphstream.stream.Replayable.Controller;
 import org.graphstream.stream.Sink;
 import org.graphstream.stream.Source;
 import org.graphstream.stream.SourceBase;
-
-import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,21 +91,17 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 	/**
 	 * Proxy id.
 	 */
-	protected String id;
+	private String id;
 
 	/**
 	 * The event sender name, usually the graph name.
 	 */
-	protected String from;
+	private String from;
 
 	/**
 	 * The message box used to exchange messages between the two threads.
 	 */
-	protected LinkedList<GraphEvents> events;
-	protected LinkedList<Object[]> eventsData;
-
-	protected ReentrantLock lock;
-	protected Condition notEmpty;
+    private final BlockingQueue<GraphMessage> queue;
 
 	/**
 	 * Used only to remove the listener. We ensure this is done in the source
@@ -121,10 +115,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 	protected boolean unregisterWhenPossible = false;
 
 	public ThreadProxyPipe() {
-		this.events = new LinkedList<GraphEvents>();
-		this.eventsData = new LinkedList<Object[]>();
-		this.lock = new ReentrantLock();
-		this.notEmpty = this.lock.newCondition();
+		this.queue = new LinkedBlockingQueue<>(); 
 		this.from = "<in>";
 		this.input = null;
 	}
@@ -171,7 +162,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		if (initialListener != null)
 			addSink(initialListener);
 
-		init(input, replay);
+		this.init(input, replay);
 	}
 
 	public void init() {
@@ -198,21 +189,13 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 	 *            {@link org.graphstream.stream.Replayable} source to enable
 	 *            replay, else nothing happens.
 	 */
-	public void init(Source source, boolean replay) {
-		lock.lock();
-
-		try {
-			if (this.input != null)
-				this.input.removeSink(this);
-
-			this.input = source;
-
-			this.events.clear();
-			this.eventsData.clear();
-		} finally {
-			lock.unlock();
-		}
-
+	public void init(final Source source, final boolean replay) {		
+        if (this.input != null) {
+            this.input.removeSink(this);
+        }
+        this.input = source;
+        this.queue.clear();
+		
 		if (source != null) {
 			if (source instanceof Graph)
 				this.from = ((Graph) source).getId();
@@ -231,12 +214,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 
 	@Override
 	public String toString() {
-		String dest = "nil";
-
-		if (attrSinks.size() > 0)
-			dest = attrSinks.get(0).toString();
-
-		return String.format("thread-proxy(from %s to %s)", from, dest);
+		return String.format("thread-proxy(from %s)", from);
 	}
 
 	/**
@@ -253,87 +231,64 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 	 * input source sent events. If some event occurred, the listeners will be
 	 * called.
 	 */
+    @Override
 	public void pump() {
-		GraphEvents e = null;
-		Object[] data = null;
-
-		do {
-			lock.lock();
-
-			try {
-				e = events.poll();
-				data = eventsData.poll();
-			} finally {
-				lock.unlock();
-			}
-
-			if (e != null)
-				processMessage(e, data);
-		} while (e != null);
+        while (!this.queue.isEmpty()) {
+            final GraphMessage msg = this.queue.poll();
+            if (msg != null) {
+                this.processMessage(msg.event, msg.data);
+            }
+        }
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.graphstream.stream.ProxyPipe#blockingPump()
-	 */
+	@Override
 	public void blockingPump() throws InterruptedException {
 		blockingPump(0);
 	}
 
-	public void blockingPump(long timeout) throws InterruptedException {
-		GraphEvents e;
-		Object[] data;
-
-		lock.lock();
-
-		try {
-			if (timeout > 0)
-				while (events.size() == 0)
-					notEmpty.await(timeout, TimeUnit.MILLISECONDS);
-			else
-				while (events.size() == 0)
-					notEmpty.await();
-		} finally {
-			lock.unlock();
-		}
-
-		do {
-			lock.lock();
-
-			try {
-				e = events.poll();
-				data = eventsData.poll();
-			} finally {
-				lock.unlock();
-			}
-
-			if (e != null)
-				processMessage(e, data);
-		} while (e != null);
+    @Override
+	public void blockingPump(final long timeout) throws InterruptedException {
+        try
+        {
+            final GraphMessage msg;
+            if (timeout > 0) { 
+                msg = this.queue.poll(timeout, TimeUnit.MILLISECONDS);
+            } else { 
+                msg = this.queue.take();                
+            }
+            if (msg != null)
+            {
+                this.processMessage(msg.event, msg.data);
+            }
+        }
+        catch (final InterruptedException e)
+        {
+            logger.warn("Unable to poll graph pipe event.", e);
+        }		
+        this.pump();
 	}
 
 	public boolean hasPostRemaining() {
-		boolean r = true;
-		lock.lock();
-
-		try {
-			r = events.size() > 0;
-		} finally {
-			lock.unlock();
-		}
-
-		return r;
+		return !this.queue.isEmpty();
 	}
 
-	/**
-	 * Set of events sent via the message box.
-	 */
-	protected static enum GraphEvents {
+	
+	private static enum GraphEvents {
 		ADD_NODE, DEL_NODE, ADD_EDGE, DEL_EDGE, STEP, CLEARED, ADD_GRAPH_ATTR, CHG_GRAPH_ATTR, DEL_GRAPH_ATTR, ADD_NODE_ATTR, CHG_NODE_ATTR, DEL_NODE_ATTR, ADD_EDGE_ATTR, CHG_EDGE_ATTR, DEL_EDGE_ATTR
 	};
+    
+    
+    private static class GraphMessage { 
+       private final GraphEvents event;
+       private final Object[] data;
+       public GraphMessage(final GraphEvents e, final Object[] d) {
+           this.event = e;
+           this.data = d;
+       }
+    }
+    
 
-	protected boolean maybeUnregister() {
+    private boolean maybeUnregister() {
 		if (unregisterWhenPossible) {
 			if (input != null)
 				input.removeSink(this);
@@ -343,37 +298,41 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		return false;
 	}
 
-	protected void post(GraphEvents e, Object... data) {
-		lock.lock();
-
-		try {
-			events.add(e);
-			eventsData.add(data);
-
-			notEmpty.signal();
-		} finally {
-			lock.unlock();
-		}
+	private boolean post(final GraphEvents event, final Object... data) {
+        if (null == event) {
+            return false;
+        }
+        if (null == data || data.length <= 0) {
+            return false;
+        }
+        try { 
+            this.queue.put(new GraphMessage(event, data));
+            return true;
+        } catch (final Exception e) {
+            logger.warn("Unable to added graph message to pipe.", e);
+            return true;
+        }
 	}
 
+    @Override
 	public void edgeAttributeAdded(String graphId, long timeId, String edgeId,
 			String attribute, Object value) {
 		if (maybeUnregister())
 			return;
 
-		post(GraphEvents.ADD_EDGE_ATTR, graphId, timeId, edgeId, attribute,
-				value);
+		post(GraphEvents.ADD_EDGE_ATTR, graphId, timeId, edgeId, attribute, value);
 	}
 
+    @Override
 	public void edgeAttributeChanged(String graphId, long timeId,
 			String edgeId, String attribute, Object oldValue, Object newValue) {
 		if (maybeUnregister())
 			return;
 
-		post(GraphEvents.CHG_EDGE_ATTR, graphId, timeId, edgeId, attribute,
-				oldValue, newValue);
+		post(GraphEvents.CHG_EDGE_ATTR, graphId, timeId, edgeId, attribute, oldValue, newValue);
 	}
 
+    @Override
 	public void edgeAttributeRemoved(String graphId, long timeId,
 			String edgeId, String attribute) {
 		if (maybeUnregister())
@@ -382,6 +341,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		post(GraphEvents.DEL_EDGE_ATTR, graphId, timeId, edgeId, attribute);
 	}
 
+    @Override
 	public void graphAttributeAdded(String graphId, long timeId,
 			String attribute, Object value) {
 		if (maybeUnregister())
@@ -390,15 +350,16 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		post(GraphEvents.ADD_GRAPH_ATTR, graphId, timeId, attribute, value);
 	}
 
+    @Override
 	public void graphAttributeChanged(String graphId, long timeId,
 			String attribute, Object oldValue, Object newValue) {
 		if (maybeUnregister())
 			return;
 
-		post(GraphEvents.CHG_GRAPH_ATTR, graphId, timeId, attribute, oldValue,
-				newValue);
+		post(GraphEvents.CHG_GRAPH_ATTR, graphId, timeId, attribute, oldValue, newValue);
 	}
 
+    @Override
 	public void graphAttributeRemoved(String graphId, long timeId,
 			String attribute) {
 		if (maybeUnregister())
@@ -407,24 +368,25 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		post(GraphEvents.DEL_GRAPH_ATTR, graphId, timeId, attribute);
 	}
 
+    @Override
 	public void nodeAttributeAdded(String graphId, long timeId, String nodeId,
 			String attribute, Object value) {
 		if (maybeUnregister())
 			return;
 
-		post(GraphEvents.ADD_NODE_ATTR, graphId, timeId, nodeId, attribute,
-				value);
+		post(GraphEvents.ADD_NODE_ATTR, graphId, timeId, nodeId, attribute, value);
 	}
 
+    @Override
 	public void nodeAttributeChanged(String graphId, long timeId,
 			String nodeId, String attribute, Object oldValue, Object newValue) {
 		if (maybeUnregister())
 			return;
 
-		post(GraphEvents.CHG_NODE_ATTR, graphId, timeId, nodeId, attribute,
-				oldValue, newValue);
+		post(GraphEvents.CHG_NODE_ATTR, graphId, timeId, nodeId, attribute, oldValue, newValue);
 	}
 
+    @Override
 	public void nodeAttributeRemoved(String graphId, long timeId,
 			String nodeId, String attribute) {
 		if (maybeUnregister())
@@ -433,15 +395,16 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		post(GraphEvents.DEL_NODE_ATTR, graphId, timeId, nodeId, attribute);
 	}
 
+    @Override
 	public void edgeAdded(String graphId, long timeId, String edgeId,
 			String fromNodeId, String toNodeId, boolean directed) {
 		if (maybeUnregister())
 			return;
 
-		post(GraphEvents.ADD_EDGE, graphId, timeId, edgeId, fromNodeId,
-				toNodeId, directed);
+		post(GraphEvents.ADD_EDGE, graphId, timeId, edgeId, fromNodeId, toNodeId, directed);
 	}
-
+    
+    @Override
 	public void edgeRemoved(String graphId, long timeId, String edgeId) {
 		if (maybeUnregister())
 			return;
@@ -449,6 +412,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		post(GraphEvents.DEL_EDGE, graphId, timeId, edgeId);
 	}
 
+    @Override
 	public void graphCleared(String graphId, long timeId) {
 		if (maybeUnregister())
 			return;
@@ -456,6 +420,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		post(GraphEvents.CLEARED, graphId, timeId);
 	}
 
+    @Override
 	public void nodeAdded(String graphId, long timeId, String nodeId) {
 		if (maybeUnregister())
 			return;
@@ -463,6 +428,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		post(GraphEvents.ADD_NODE, graphId, timeId, nodeId);
 	}
 
+    @Override
 	public void nodeRemoved(String graphId, long timeId, String nodeId) {
 		if (maybeUnregister())
 			return;
@@ -470,6 +436,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		post(GraphEvents.DEL_NODE, graphId, timeId, nodeId);
 	}
 
+    @Override
 	public void stepBegins(String graphId, long timeId, double step) {
 		if (maybeUnregister())
 			return;
@@ -479,7 +446,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 
 	// MBoxListener
 
-	protected void processMessage(GraphEvents e, Object[] data) {
+	private void processMessage(final GraphEvents e, final Object[] data) {
 		String graphId, elementId, attribute;
 		Long timeId;
 		Object newValue, oldValue;

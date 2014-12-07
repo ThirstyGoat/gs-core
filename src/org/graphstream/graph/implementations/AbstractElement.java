@@ -31,15 +31,14 @@
  */
 package org.graphstream.graph.implementations;
 
-import org.graphstream.graph.CompoundAttribute;
-import org.graphstream.graph.Element;
-import org.graphstream.graph.NullAttributeException;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import org.graphstream.graph.CompoundAttribute;
+import org.graphstream.graph.Element;
+import org.graphstream.graph.NullAttributeException;
 
 /**
  * A base implementation of an element.
@@ -270,9 +269,6 @@ public abstract class AbstractElement implements Element {
         }
 		if (attributes != null) {
 			Object o = attributes.get(key);
-            if (null == o) {
-                return null;
-            }
             if (o instanceof Number) {
                 return (Number) o;
             }

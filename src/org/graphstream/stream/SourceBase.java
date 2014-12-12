@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
+import java.util.UUID;
 import org.graphstream.graph.Element.AttributeChangeEvent;
 import org.graphstream.stream.sync.SourceTime;
 
@@ -103,9 +104,7 @@ public abstract class SourceBase implements Source {
 	// Construction
 
 	protected SourceBase() {
-		this(String.format("sourceOnThread#%d_%d", Thread.currentThread()
-				.getId(), System.currentTimeMillis()
-				+ ((int) (Math.random() * 1000))));
+		this(SourceBase.class.getSimpleName() + "#" + UUID.randomUUID());
 	}
 
 	protected SourceBase(String sourceId) {
@@ -116,12 +115,16 @@ public abstract class SourceBase implements Source {
 	// Access
 
 	public Iterable<AttributeSink> attributeSinks() {
-		return attrSinks;
+		return this.attrSinks;
 	}
 
 	public Iterable<ElementSink> elementSinks() {
-		return eltsSinks;
+		return this.eltsSinks;
 	}
+    
+    public String getId() { 
+        return this.sourceId;
+    }
 
 	// Command
 

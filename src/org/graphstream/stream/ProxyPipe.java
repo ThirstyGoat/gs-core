@@ -86,6 +86,13 @@ public interface ProxyPipe extends Pipe {
 	 * outputs.
 	 */
 	void pump();
+    
+    /**
+     * Check if some events are pending and dispatch them to the registered
+     * outputs, with optional 'maximum events' argument.
+     * @param maxEvents The recommended maximum number of events to process.
+     */
+    void pump(int maxEvents);
 
 	/**
 	 * Same as {@link #pump()} but try to block until new events were available.

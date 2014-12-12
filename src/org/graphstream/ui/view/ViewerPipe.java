@@ -31,11 +31,11 @@
  */
 package org.graphstream.ui.view;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.UUID;
 import org.graphstream.stream.ProxyPipe;
 import org.graphstream.stream.SourceBase;
-import org.graphstream.ui.view.ViewerListener;
-
-import java.util.HashSet;
 
 /**
  * Shell around a proxy pipe coming from the viewer allowing to put viewer
@@ -57,17 +57,17 @@ import java.util.HashSet;
 public class ViewerPipe extends SourceBase implements ProxyPipe {
 	// Attribute
 
-	private String id;
+	private final String id;
 
 	/**
 	 * The incoming event stream.
 	 */
-	protected ProxyPipe pipeIn;
+    private final ProxyPipe pipeIn;
 
 	/**
 	 * Listeners on the viewer specific events.
 	 */
-	protected HashSet<ViewerListener> viewerListeners = new HashSet<ViewerListener>();
+    private final Collection<ViewerListener> viewerListeners = new HashSet<>();
 
 	// Construction
 
@@ -75,6 +75,7 @@ public class ViewerPipe extends SourceBase implements ProxyPipe {
 	 * A shell around a pipe coming from a viewer in another thread.
 	 */
 	protected ViewerPipe(String id, ProxyPipe pipeIn) {
+        super(ViewerPipe.class.getSimpleName() + "#" + UUID.randomUUID());
 		this.id = id;
 		this.pipeIn = pipeIn;
 		pipeIn.addSink(this);
@@ -92,6 +93,12 @@ public class ViewerPipe extends SourceBase implements ProxyPipe {
 	public void pump() {
 		pipeIn.pump();
 	}
+    
+    @Override
+    public void pump(int maxEvents)
+    {
+        pipeIn.pump(maxEvents);
+    }
 
     @Override
 	public void blockingPump() throws InterruptedException {

@@ -32,69 +32,79 @@
 package org.graphstream.stream.sync;
 
 import java.security.AccessControlException;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class SinkTime {
-	/**
-	 * Key used to disable synchro. Just run : java -DSYNC_DISABLE_KEY ...
-	 */
-	public static final String SYNC_DISABLE_KEY = "org.graphstream.stream.sync.disable";
-	/**
-	 * Flag used to disable sync.
-	 */
-	protected static final boolean disableSync;
+public class SinkTime
+{
+    /**
+     * Key used to disable synchro. Just run : java -DSYNC_DISABLE_KEY ...
+     */
+    public static final String SYNC_DISABLE_KEY = "org.graphstream.stream.sync.disable";
 
-	/*
-	 * The following code is used to prevent AccessControlException to be thrown
-	 * when trying to get the value of the property (in applets for example).
-	 */
-	static {
-		boolean off;
+    /**
+     * Flag used to disable sync.
+     */
+    protected static final boolean disableSync;
 
-		try {
-			off = System.getProperty(SYNC_DISABLE_KEY) != null;
-		} catch (AccessControlException ex) {
-			off = false;
-		}
+    /*
+     * The following code is used to prevent AccessControlException to be thrown
+     * when trying to get the value of the property (in applets for example).
+     */
+    static
+    {
+        boolean off;
+        try
+        {
+            off = System.getProperty(SYNC_DISABLE_KEY) != null;
+        }
+        catch (AccessControlException ex)
+        {
+            off = false;
+        }
+        disableSync = off;
+    }
 
-		disableSync = off;
-	}
+    /**
+     * Map storing times of sources.
+     */
+    private final Map<String, Long> times = new ConcurrentHashMap<>();
 
-	/**
-	 * Map storing times of sources.
-	 */
-	protected HashMap<String, Long> times = new HashMap<String, Long>();
+    /**
+     * Update timeId for a source.
+     *
+     * @param sourceId
+     * @param timeId
+     * @return true if time has been updated
+     */
+    protected boolean setTimeFor(String sourceId, long timeId)
+    {
+        final Long knownTimeId = times.get(sourceId);
 
-	/**
-	 * Update timeId for a source.
-	 * 
-	 * @param sourceId
-	 * @param timeId
-	 * @return true if time has been updated
-	 */
-	protected boolean setTimeFor(String sourceId, long timeId) {
-		Long knownTimeId = times.get(sourceId);
+        if (knownTimeId == null)
+        {
+            times.put(sourceId, timeId);
+            return true;
+        }
+        if (timeId > knownTimeId)
+        {
+            times.put(sourceId, timeId);
+            return true;
+        }
 
-		if (knownTimeId == null) {
-			times.put(sourceId, timeId);
-			return true;
-		} else if (timeId > knownTimeId) {
-			times.put(sourceId, timeId);
-			return true;
-		}
+        return false;
+    }
 
-		return false;
-	}
-
-	/**
-	 * Allow to know if event is new for this source. This updates the timeId
-	 * mapped to the source.
-	 * 
-	 * @param sourceId
-	 * @param timeId
-	 * @return true if event is new for the source
-	 */
-	public boolean isNewEvent(String sourceId, long timeId) {
-		return disableSync || setTimeFor(sourceId, timeId);
-	}
+    /**
+     * Allow to know if event is new for this source. This updates the timeId
+     * mapped to the source.
+     *
+     * @param sourceId
+     * @param timeId
+     * @return true if event is new for the source
+     */
+    public boolean isNewEvent(String sourceId, long timeId)
+    {
+        return disableSync || setTimeFor(sourceId, timeId);
+    }
 }

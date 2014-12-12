@@ -31,6 +31,7 @@
  */
 package org.graphstream.stream.thread;
 
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -115,6 +116,7 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 	protected boolean unregisterWhenPossible = false;
 
 	public ThreadProxyPipe() {
+        super(ThreadProxyPipe.class.getSimpleName() + "#" + UUID.randomUUID());
 		this.queue = new LinkedBlockingQueue<>(); 
 		this.from = "<in>";
 		this.input = null;
@@ -226,20 +228,27 @@ public class ThreadProxyPipe extends SourceBase implements ProxyPipe {
 		unregisterWhenPossible = true;
 	}
 
-	/**
-	 * This method must be called regularly in the output thread to check if the
-	 * input source sent events. If some event occurred, the listeners will be
-	 * called.
-	 */
     @Override
 	public void pump() {
-        while (!this.queue.isEmpty()) {
+       this.pump(-1);
+	}
+    
+    @Override
+    public void pump(final int maxEvents) {
+        int num = 0;
+        while (!this.queue.isEmpty())
+        {
             final GraphMessage msg = this.queue.poll();
-            if (msg != null) {
+            if (msg != null)
+            {
+                num++;
                 this.processMessage(msg.event, msg.data);
+                if (maxEvents > 0 && maxEvents <= num) { 
+                    break;
+                }
             }
         }
-	}
+    }
 
 	@Override
 	public void blockingPump() throws InterruptedException {

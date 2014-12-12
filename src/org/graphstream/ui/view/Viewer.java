@@ -35,9 +35,8 @@ import java.security.AccessControlException;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
+import org.graphstream.stream.LocalReplayer;
 import org.graphstream.stream.ProxyPipe;
 import org.graphstream.stream.Source;
 import org.graphstream.stream.thread.ThreadProxyPipe;
@@ -102,7 +101,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Viewer
 {
-
     /**
      * class level logger
      */
@@ -192,7 +190,6 @@ public class Viewer
      */
     private ProxyPipe layoutPipeIn = null;
 
-    // Construction
     /**
      * The graph or source of graph events is in another thread or on another
      * machine, but the pipe already exists. The graphic graph displayed by this
@@ -200,10 +197,27 @@ public class Viewer
      *
      * @param source The source of graph events.
      */
-    public Viewer(ProxyPipe source)
+    public Viewer(final ProxyPipe source)
     {
-        graphInAnotherThread = true;
-        timerFactory = new SwingViewTimerFactory();
+        this(source, new SwingViewTimerFactory());
+    }
+
+    /**
+     * The graph or source of graph events is in another thread or on another
+     * machine, but the pipe already exists. The graphic graph displayed by this
+     * viewer is created.
+     *
+     * @param source The source of graph events.
+     * @param timerFactory The view timer factory.
+     */
+    public Viewer(final ProxyPipe source, final ViewTimerFactory timerFactory)
+    {
+        if (null == timerFactory)
+        {
+            throw new IllegalArgumentException("Timer factory cannot be null.");
+        }
+        this.graphInAnotherThread = true;
+        this.timerFactory = timerFactory;
         init(new GraphicGraph(newGraphicGraphId()), source, (Source) null);
     }
 
@@ -260,32 +274,21 @@ public class Viewer
         switch (threadingModel)
         {
             case GRAPH_IN_GUI_THREAD:
-                graphInAnotherThread = false;
-                init(new GraphicGraph(newGraphicGraphId()), (ProxyPipe) null, graph);
-                enableXYZfeedback(true);
+                this.graphInAnotherThread = false;
+                this.init(new GraphicGraph(newGraphicGraphId()), (ProxyPipe) null, graph);
+                this.enableXYZfeedback(true);
                 break;
             case GRAPH_IN_ANOTHER_THREAD:
-                graphInAnotherThread = true;
-
-                ThreadProxyPipe tpp = new ThreadProxyPipe();
+                this.graphInAnotherThread = true;
+                final ThreadProxyPipe tpp = new ThreadProxyPipe();
                 tpp.init(graph, true);
-
-                init(new GraphicGraph(newGraphicGraphId()), tpp, (Source) null);
-                enableXYZfeedback(false);
+                this.init(new GraphicGraph(newGraphicGraphId()), tpp, (Source) null);
+                this.enableXYZfeedback(false);
                 break;
             case GRAPH_ON_NETWORK:
-                throw new RuntimeException("TO DO, sorry !:-)");
+            default:
+                throw new UnsupportedOperationException();
         }
-    }
-
-    /**
-     * Create a new unique identifier for a graph.
-     *
-     * @return The new identifier.
-     */
-    private static String newGraphicGraphId()
-    {
-        return "GraphicGraph-" + UUID.randomUUID().toString();
     }
 
     /**
@@ -297,7 +300,7 @@ public class Viewer
      * @param source The source of events from this thread (null if ppipe !=
      * null).
      */
-    private void init(GraphicGraph graph, ProxyPipe ppipe, Source source)
+    private void init(final GraphicGraph graph, final ProxyPipe ppipe, final Source source)
     {
         this.graph = graph;
         this.pumpPipe = ppipe;
@@ -307,23 +310,23 @@ public class Viewer
             @Override
             public void run()
             {
-                pumpGraphEvents();
+                pumpGraphEvents(250);
             }
         });
 
         assert ((ppipe != null && source == null) || (ppipe == null && source != null));
 
-        if (pumpPipe != null)
+        if (this.pumpPipe != null)
         {
-            pumpPipe.addSink(graph);
+            this.pumpPipe.addSink(graph);
         }
-        if (sourceInSameThread != null)
+        if (this.sourceInSameThread instanceof Graph)
         {
-            if (source instanceof Graph)
-            {
-                replayGraph((Graph) source);
-            }
-            sourceInSameThread.addSink(graph);
+            new LocalReplayer(this.graph).replayGraph((Graph) this.sourceInSameThread);
+        }
+        if (this.sourceInSameThread != null)
+        {
+            this.sourceInSameThread.addSink(graph);
         }
     }
 
@@ -597,7 +600,7 @@ public class Viewer
      * triggers a repaint. Never call this method, it is called by a Swing Timer
      * automatically.
      */
-    private void pumpGraphEvents()
+    private void pumpGraphEvents(final int maxEvents)
     {
         synchronized (views)
         {
@@ -605,7 +608,7 @@ public class Viewer
             // long gsize1=graph.getNodeCount();
             if (pumpPipe != null)
             {
-                pumpPipe.pump();
+                pumpPipe.pump(maxEvents);
             }
             // long gsize2=graph.getNodeCount();
             // long t2=System.currentTimeMillis();
@@ -751,48 +754,8 @@ public class Viewer
         }
     }
 
-    /**
-     * Dirty replay of the graph.
-     */
-    protected void replayGraph(Graph graph)
+    private static String newGraphicGraphId()
     {
-        // Replay all graph attributes.
-
-        if (graph.getAttributeKeySet() != null)
-        {
-            for (String key : graph.getAttributeKeySet())
-            {
-                this.graph.addAttribute(key, graph.getAttribute(key));
-            }
-        }
-
-        // Replay all nodes and their attributes.
-        for (Node node : graph)
-        {
-            Node n = this.graph.addNode(node.getId());
-
-            if (node.getAttributeKeySet() != null)
-            {
-                for (String key : node.getAttributeKeySet())
-                {
-                    n.addAttribute(key, node.getAttribute(key));
-                }
-            }
-        }
-
-        // Replay all edges and their attributes.
-        for (Edge edge : graph.getEachEdge())
-        {
-            Edge e = this.graph.addEdge(edge.getId(), edge.getSourceNode()
-                    .getId(), edge.getTargetNode().getId(), edge.isDirected());
-
-            if (edge.getAttributeKeySet() != null)
-            {
-                for (String key : edge.getAttributeKeySet())
-                {
-                    e.addAttribute(key, edge.getAttribute(key));
-                }
-            }
-        }
+        return "GraphicGraph-" + UUID.randomUUID().toString();
     }
 }

@@ -248,14 +248,16 @@ public class ThreadProxyPipeOld extends SourceBase implements ProxyPipe, MBoxLis
 		unregisterWhenPossible = true;
 	}
 
-	/**
-	 * This method must be called regularly in the output thread to check if the
-	 * input source sent events. If some event occurred, the listeners will be
-	 * called.
-	 */
+	   @Override
 	public void pump() {
 		((MBoxStandalone) events).processMessages();
 	}
+    
+    @Override
+    public void pump(int maxEvents)
+    {
+        ((MBoxStandalone) events).processMessages();
+    }
 
 	/*
 	 * (non-Javadoc)

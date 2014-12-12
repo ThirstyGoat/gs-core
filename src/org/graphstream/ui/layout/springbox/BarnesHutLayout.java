@@ -31,6 +31,12 @@
  */
 package org.graphstream.ui.layout.springbox;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.TreeMap;
 import org.graphstream.stream.Sink;
 import org.graphstream.stream.SourceBase;
 import org.graphstream.stream.sync.SinkTime;
@@ -43,14 +49,6 @@ import org.miv.pherd.ntree.Anchor;
 import org.miv.pherd.ntree.CellSpace;
 import org.miv.pherd.ntree.OctreeCellSpace;
 import org.miv.pherd.ntree.QuadtreeCellSpace;
-
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -697,7 +695,7 @@ public abstract class BarnesHutLayout extends SourceBase implements Layout, Part
 	}
 
 	public void nodeAdded(String graphId, long time, String nodeId) {
-		if (sinkTime.isNewEvent(graphId, time)) {
+		if (sinkTime.isNewEvent(graphId, time) && null == nodes.getParticle(nodeId)) {
 			NodeParticle np = addNode(graphId, nodeId);
 			sendNodeAdded(graphId, time, nodeId);
 		}

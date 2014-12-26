@@ -604,40 +604,29 @@ public class Viewer
     {
         synchronized (views)
         {
-            // long t1=System.currentTimeMillis();
-            // long gsize1=graph.getNodeCount();
-            if (pumpPipe != null)
+            if (this.pumpPipe != null)
             {
-                pumpPipe.pump(maxEvents);
+                this.pumpPipe.pump(maxEvents);
             }
-            // long gsize2=graph.getNodeCount();
-            // long t2=System.currentTimeMillis();
-
-            if (layoutPipeIn != null)
+            
+            if (this.layoutPipeIn != null)
             {
-                layoutPipeIn.pump();
+                this.layoutPipeIn.pump();
             }
-            // long t3=System.currentTimeMillis();
-
-            boolean changed = graph.graphChangedFlag();
-
-            if (changed)
+            
+            if (this.graph != null)
             {
-                computeGraphMetrics();
-                // long t4=System.currentTimeMillis();
-
-                for (View view : views.values())
+                boolean changed = this.graph.graphChangedFlag();
+                if (changed)
                 {
-                    view.display(graph, changed);
+                    this.computeGraphMetrics();
+                    for (final View view : this.views.values())
+                    {
+                        view.display(this.graph, changed);
+                    }
                 }
+                this.graph.resetGraphChangedFlag();
             }
-            // long t5=System.currentTimeMillis();
-
-            graph.resetGraphChangedFlag();
-
-            // System.err.printf("display pump=%f  layoutPump=%f  metrics=%f  display=%f (size delta=%d  size1=%d size2=%d)%n",
-            // (t2-t1)/1000.0, (t3-t2)/1000.0, (t4-t3)/1000.0, (t5-t4)/1000.0,
-            // (gsize2-gsize1), gsize1, gsize2);
         }
     }
 

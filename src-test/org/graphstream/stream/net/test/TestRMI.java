@@ -31,22 +31,18 @@
  */
 package org.graphstream.stream.net.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.util.LinkedList;
-
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.DefaultGraph;
 import org.graphstream.stream.rmi.RMISink;
 import org.graphstream.stream.rmi.RMISource;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.util.LinkedList;
 
 public class TestRMI {
 
@@ -76,7 +72,7 @@ public class TestRMI {
 			source.bind(name);
 			sink.register("//localhost/" + name);
 		} catch (RemoteException e) {
-			fail();
+            Assert.fail();
 		}
 
 		Node A = g1.addNode("A");
@@ -105,52 +101,52 @@ public class TestRMI {
 		B = g2.getNode("B");
 		C = g2.getNode("C");
 
-		assertNotNull(A);
-		assertNotNull(B);
-		assertNotNull(C);
-		assertEquals(g2.getNodeCount(), 3);
+        Assert.assertNotNull(A);
+        Assert.assertNotNull(B);
+        Assert.assertNotNull(C);
+        Assert.assertEquals(g2.getNodeCount(), 3);
 
 		AB = g2.getEdge("AB");
 		AC = g2.getEdge("AC");
 		BC = g2.getEdge("BC");
 
-		assertNotNull(AB);
-		assertNotNull(AC);
-		assertNotNull(BC);
-		assertEquals(g2.getEdgeCount(), 3);
+        Assert.assertNotNull(AB);
+        Assert.assertNotNull(AC);
+        Assert.assertNotNull(BC);
+        Assert.assertEquals(g2.getEdgeCount(), 3);
 
-		assertEquals("A", AB.getNode0().getId());
-		assertEquals("B", AB.getNode1().getId());
-		assertEquals("A", AC.getNode0().getId());
-		assertEquals("C", AC.getNode1().getId());
-		assertEquals("B", BC.getNode0().getId());
-		assertEquals("C", BC.getNode1().getId());
-		
-		assertTrue(!AB.isDirected());
-		assertTrue(AC.isDirected());
-		assertTrue(!BC.isDirected());
-		
-		assertEquals(A.getAttribute("int"), 1);
-		assertEquals(B.getAttribute("string"), "test");
-		assertEquals(C.getAttribute("double"), 2.0);
+        Assert.assertEquals("A", AB.getNode0().getId());
+        Assert.assertEquals("B", AB.getNode1().getId());
+        Assert.assertEquals("A", AC.getNode0().getId());
+        Assert.assertEquals("C", AC.getNode1().getId());
+        Assert.assertEquals("B", BC.getNode0().getId());
+        Assert.assertEquals("C", BC.getNode1().getId());
+
+        Assert.assertTrue(!AB.isDirected());
+        Assert.assertTrue(AC.isDirected());
+        Assert.assertTrue(!BC.isDirected());
+
+        Assert.assertEquals(A.getAttribute("int"), 1);
+        Assert.assertEquals(B.getAttribute("string"), "test");
+        Assert.assertEquals(C.getAttribute("double"), 2.0);
 
 		try {
 			double[][] points = AB.getAttribute("points");
 
-			assertEquals(points.length, 2);
-			assertEquals(points[0].length, 2);
-			assertEquals(points[1].length, 2);
-			assertEquals(points[0][0], 1.0);
-			assertEquals(points[0][1], 1.0);
-			assertEquals(points[1][0], 2.0);
-			assertEquals(points[1][1], 2.0);
+            Assert.assertEquals(points.length, 2);
+            Assert.assertEquals(points[0].length, 2);
+            Assert.assertEquals(points[1].length, 2);
+            Assert.assertEquals(points[0][0], 1.0);
+            Assert.assertEquals(points[0][1], 1.0);
+            Assert.assertEquals(points[1][0], 2.0);
+            Assert.assertEquals(points[1][1], 2.0);
 		} catch (ClassCastException e) {
-			fail();
+            Assert.fail();
 		} catch (NullPointerException e) {
-			fail();
+            Assert.fail();
 		}
 
-		assertEquals(list, AC.getAttribute("list"));
-		assertTrue((Boolean) BC.getAttribute("boolean"));
+        Assert.assertEquals(list, AC.getAttribute("list"));
+        Assert.assertTrue((Boolean) BC.getAttribute("boolean"));
 	}
 }

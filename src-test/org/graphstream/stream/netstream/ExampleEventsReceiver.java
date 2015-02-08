@@ -31,16 +31,16 @@
  */
 package org.graphstream.stream.netstream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.graphstream.stream.Sink;
+import org.graphstream.stream.thread.ThreadProxyPipe;
+import org.junit.Assert;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-import org.graphstream.stream.Sink;
-import org.graphstream.stream.netstream.NetStreamReceiver;
-import org.graphstream.stream.thread.ThreadProxyPipe;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * 
@@ -148,7 +148,7 @@ public class ExampleEventsReceiver {
 			}
 			
 			public void stepBegins(String sourceId, long timeId, double step) {
-				assertEquals(1.1, step);
+                Assert.assertEquals(1.1, step);
 			}
 		});
 

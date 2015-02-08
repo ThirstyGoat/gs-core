@@ -31,16 +31,6 @@
  */
 package org.graphstream.stream.netstream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Vector;
-
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -51,7 +41,18 @@ import org.graphstream.stream.SinkAdapter;
 import org.graphstream.stream.netstream.packing.Base64Packer;
 import org.graphstream.stream.netstream.packing.Base64Unpacker;
 import org.graphstream.stream.thread.ThreadProxyPipe;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Vector;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test of the NetStream protocol, sender and receiver.
@@ -592,7 +593,7 @@ public class TestNetStream {
 			}
 
 			public void stepBegins(String sourceId, long timeId, double step) {
-				assertEquals(1.1, step);
+                Assert.assertEquals(1.1, step);
 			}
 		});
 

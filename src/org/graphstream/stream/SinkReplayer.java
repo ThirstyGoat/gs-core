@@ -5,13 +5,14 @@
  */
 package org.graphstream.stream;
 
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
 
 /**
  * A replayer that sends events to sink.
@@ -26,16 +27,18 @@ public class SinkReplayer implements Replayer
 
     private final AtomicInteger timer = new AtomicInteger();
 
+
     public SinkReplayer(final Sink sink)
     {
         this(SinkReplayer.class.getSimpleName() + "#" + UUID.randomUUID(), sink);
     }
 
+
     public SinkReplayer(final String id, final Sink sink)
     {
         if (null == id)
         {
-            throw new IllegalArgumentException("Id canont be null.");
+            throw new IllegalArgumentException("Id cannot be null.");
         }
         if (null == sink)
         {
@@ -45,8 +48,19 @@ public class SinkReplayer implements Replayer
         this.sink = sink;
     }
 
+
     @Override
     public void replayNodes(final Iterable<Node> nodes)
+    {
+        if (null == nodes)
+        {
+            return;
+        }
+        this.replayNodes(nodes, false);
+    }
+
+
+    public void replayNodes(final Iterable<Node> nodes, final boolean reset)
     {
         if (null == nodes)
         {
@@ -56,6 +70,10 @@ public class SinkReplayer implements Replayer
         for (final Node node : nodes)
         {
             final String nodeId = node.getId();
+            if (reset)
+            {
+                this.sink.nodeRemoved(sourceId, timer.incrementAndGet(), nodeId);
+            }
             this.sink.nodeAdded(sourceId, timer.incrementAndGet(), nodeId);
             final Collection<String> attributes = node.getAttributeKeySet();
             if (attributes != null && !attributes.isEmpty())
@@ -67,6 +85,7 @@ public class SinkReplayer implements Replayer
             }
         }
     }
+
 
     @Override
     public void replayEdges(final Iterable<Edge> edges)
@@ -90,6 +109,7 @@ public class SinkReplayer implements Replayer
             }
         }
     }
+
 
     @Override
     public void replayGraph(final Graph graph)

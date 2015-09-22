@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.graphstream</groupId>
+  <artifactId>gs-core</artifactId>
+  <versioning>
+    <release>2.0-TRAJAR</release>
+    <versions>
+      <version>2.0-TRAJAR</version>
+    </versions>
+    <lastUpdated>20150922133915</lastUpdated>
+  </versioning>
+</metadata>
